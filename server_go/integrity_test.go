@@ -150,7 +150,7 @@ func TestSessionRetryStopsAfterSecond408(t *testing.T) {
 		calls++
 		return &http.Response{StatusCode: 408, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(""))}, nil
 	})
-	if _, err := s.makeRequest("cmd=test", nil, true); err == nil || calls != 2 {
+	if _, err := s.makeRequest(context.Background(), "cmd=test", nil, true); err == nil || calls != 2 {
 		t.Fatal(err, calls)
 	}
 }

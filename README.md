@@ -72,7 +72,7 @@ Conservá viajes y lugares, y llevá un registro manual de tus gastos.
 
 ### ¿Y si te quedás sin datos?
 
-Podés **preparar un viaje para consultarlo sin conexión**: se guardan su línea, sus paradas y su recorrido. Las posiciones previamente consultadas pueden mostrarse como referencias estimadas, **no como ubicación en vivo**. No incluye descarga del mapa de calles.
+Podés **preparar un viaje para consultarlo sin conexión**: se guardan su línea, sus paradas y su recorrido. Las posiciones previamente consultadas pueden mostrarse como referencias estimadas, **no como ubicación en vivo**. Incluye un mapa local de calles de Córdoba en la APK. Al elegir un viaje se guarda automáticamente su recorrido; con conexión se actualizan las posiciones disponibles. Sin conexión se estima el avance a 18 km/h desde la última referencia, hasta el final del recorrido.
 
 > [!NOTE]
 > Las llegadas, posiciones y recorridos dependen de servicios externos. La cobertura y precisión pueden variar. Subite no está afiliada a la Municipalidad de Córdoba ni a empresas operadoras del transporte.

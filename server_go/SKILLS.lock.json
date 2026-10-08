@@ -1,0 +1,707 @@
+{
+  "source": "https://github.com/samber/cc-skills-golang",
+  "commit": "8e899e20ff0cd4dc524af3993e4c62d8ee8c5717",
+  "agent": "Codex",
+  "canonical_directory": ".agents/skills",
+  "installer": "OpenAI skill-installer/install-skill-from-github.py --method download --ref <commit> --dest <repo>/.agents/skills --path <31 selected skills>",
+  "adaptations": [
+    "Scoped concise descriptions",
+    "Go paths scoped to server_go",
+    "Subite policy pointer before upstream body",
+    "Codex invocation policy: A=true, B=false"
+  ],
+  "skills": {
+    "golang-how-to": {
+      "group": "A",
+      "files": {
+        "assets/cursor-go-skills.mdc": "4edbbb2ddef9a2841105613e6c14080b536a25e5ca40d13e6208191b0648ff61",
+        "references/by-category.md": "e57a7babbe33784e08919e09c43cff35a8e0b27d195cb486a48878f98628d575",
+        "references/disambiguation.md": "ceb39c9d65c304731c84fdd342265d70f96427c2d6bebdf243c4636731f84ba5",
+        "references/project-config.md": "739c1d1ed10f7900206bc67bdf33c8d6cbc46eb3c636c75b2d848b782bf1e8ba",
+        "SKILL.md": "ec364f51bec96667a20d67d3f8e8b5b9b7a2220bb9ed60581edf634f868313c2"
+      },
+      "installed_files": {
+        "agents/openai.yaml": "8619a54e8c098122a7f3881394f84ca89b684366e848233a29ad18b6ec363935",
+        "assets/cursor-go-skills.mdc": "4edbbb2ddef9a2841105613e6c14080b536a25e5ca40d13e6208191b0648ff61",
+        "references/by-category.md": "e57a7babbe33784e08919e09c43cff35a8e0b27d195cb486a48878f98628d575",
+        "references/disambiguation.md": "ceb39c9d65c304731c84fdd342265d70f96427c2d6bebdf243c4636731f84ba5",
+        "references/project-config.md": "739c1d1ed10f7900206bc67bdf33c8d6cbc46eb3c636c75b2d848b782bf1e8ba",
+        "SKILL.md": "d245eb7373398e56011899fbd98277d174a0541db9545e1176b0bb31a61bf3e0"
+      }
+    },
+    "golang-code-style": {
+      "group": "A",
+      "files": {
+        "evals/evals.json": "a439625516667ab0e60e58003294da3c0cf5a579d1c4741c5b5a57514ec35356",
+        "references/details.md": "3969d18fb54e59c032de0463b44b6b5bd125dfe8b726ef0f009190da81f3df07",
+        "SKILL.md": "1c53d6b8405fc2992b92524d4782c826845916d64f90a5af483b9401865b9a76"
+      },
+      "installed_files": {
+        "agents/openai.yaml": "8619a54e8c098122a7f3881394f84ca89b684366e848233a29ad18b6ec363935",
+        "evals/evals.json": "a439625516667ab0e60e58003294da3c0cf5a579d1c4741c5b5a57514ec35356",
+        "references/details.md": "3969d18fb54e59c032de0463b44b6b5bd125dfe8b726ef0f009190da81f3df07",
+        "SKILL.md": "0303901d4d433f07c24659bc0ced0194d1bb2656ec01bc56c4eeb70470d0dae7"
+      }
+    },
+    "golang-naming": {
+      "group": "A",
+      "files": {
+        "evals/evals.json": "450298ba90598fcaaff513e057c0de7c1a61ab2f1c8125f1ac26129860b4829c",
+        "references/functions-methods.md": "859a54edf59b3f72b9176bed12d0173ee4aa8f1f8494e0c6d5e968dbce960d04",
+        "references/identifiers.md": "857684c5e46e9ec66cf46edb03b952b21054491cef4b06a46bb6cf7cf833fdb4",
+        "references/packages-files.md": "e507bd5a1b2fd690638de969084c14a9cbd7ca1038e1e51a297120672b27f8c1",
+        "references/testing.md": "be7066959d1eb1da03b38ea93a2e7d6d69d3ed82b0bb5d0600a9e4065a819471",
+        "references/types-errors.md": "4402338a460d05026beeab82a92258ea0b81145f43cf6460f4363fd9a877a885",
+        "SKILL.md": "ff6e9b3d1ba65f8e243d872501f44fe8d48f90da8e9441d682e56d3e6d9e2ac7"
+      },
+      "installed_files": {
+        "agents/openai.yaml": "8619a54e8c098122a7f3881394f84ca89b684366e848233a29ad18b6ec363935",
+        "evals/evals.json": "450298ba90598fcaaff513e057c0de7c1a61ab2f1c8125f1ac26129860b4829c",
+        "references/functions-methods.md": "859a54edf59b3f72b9176bed12d0173ee4aa8f1f8494e0c6d5e968dbce960d04",
+        "references/identifiers.md": "857684c5e46e9ec66cf46edb03b952b21054491cef4b06a46bb6cf7cf833fdb4",
+        "references/packages-files.md": "e507bd5a1b2fd690638de969084c14a9cbd7ca1038e1e51a297120672b27f8c1",
+        "references/testing.md": "be7066959d1eb1da03b38ea93a2e7d6d69d3ed82b0bb5d0600a9e4065a819471",
+        "references/types-errors.md": "4402338a460d05026beeab82a92258ea0b81145f43cf6460f4363fd9a877a885",
+        "SKILL.md": "a792b12e550ba5bc491fde847328c2a0e9d8529b0063b2f13b7e4615ae4c85ff"
+      }
+    },
+    "golang-error-handling": {
+      "group": "A",
+      "files": {
+        "evals/evals.json": "a7b58b4f717745e606b067c1f65c93db55182b4a561b8ffa43158a7f64515fa7",
+        "references/error-creation.md": "8a5bda5a543ef7774ddc240cd198d34871222ed0335474df599d162f09d253c2",
+        "references/error-handling.md": "ab9c510305a1fe043502a04fe935f16dac2f95c585820ae9f0568afb2a56d357",
+        "references/error-wrapping.md": "6293caf2c41eef243dffbc2dbd17d045770f9a04e8ce910c4452b3d2b6abce06",
+        "SKILL.md": "536c25e624c3cf3def98962d9f89db07b258cde6c9e7fd17009a9eb204ba631f"
+      },
+      "installed_files": {
+        "agents/openai.yaml": "8619a54e8c098122a7f3881394f84ca89b684366e848233a29ad18b6ec363935",
+        "evals/evals.json": "a7b58b4f717745e606b067c1f65c93db55182b4a561b8ffa43158a7f64515fa7",
+        "references/error-creation.md": "8a5bda5a543ef7774ddc240cd198d34871222ed0335474df599d162f09d253c2",
+        "references/error-handling.md": "ab9c510305a1fe043502a04fe935f16dac2f95c585820ae9f0568afb2a56d357",
+        "references/error-wrapping.md": "6293caf2c41eef243dffbc2dbd17d045770f9a04e8ce910c4452b3d2b6abce06",
+        "SKILL.md": "22884e541bae45e13dc3e1c24d8645373453e6e386195fd9b119aae020a10c1b"
+      }
+    },
+    "golang-safety": {
+      "group": "A",
+      "files": {
+        "evals/evals.json": "8db07dd44d2c2b4cca7eba15f135bc6858fbbe91c3f805e6c9a8602e06f0e17c",
+        "references/nil-safety.md": "2f0bcabb4184c1b88e36bab8a3f90e57887d3a95a15f66a2123445025c91dec7",
+        "references/slice-map-safety.md": "9b048bc51d5153bd554eed7eab6685423b9ad7159462313b0fd6a1294596d86d",
+        "SKILL.md": "a9bce4568ba98ae804505d6b1d6fbe0376fe7afdc9f30051bfc03f898e26d50e"
+      },
+      "installed_files": {
+        "agents/openai.yaml": "8619a54e8c098122a7f3881394f84ca89b684366e848233a29ad18b6ec363935",
+        "evals/evals.json": "8db07dd44d2c2b4cca7eba15f135bc6858fbbe91c3f805e6c9a8602e06f0e17c",
+        "references/nil-safety.md": "2f0bcabb4184c1b88e36bab8a3f90e57887d3a95a15f66a2123445025c91dec7",
+        "references/slice-map-safety.md": "9b048bc51d5153bd554eed7eab6685423b9ad7159462313b0fd6a1294596d86d",
+        "SKILL.md": "6d35f69bf6a13a99b2379476026899396a50d674f3ef9fb6261cc70aff32a161"
+      }
+    },
+    "golang-security": {
+      "group": "A",
+      "files": {
+        "evals/evals.json": "88d584c25e5c8b9548ceac5e68d12f270a31dd9f9752554bfc9ed382eaee879f",
+        "references/architecture.md": "0596335d458de12b3e74704119b8d6deb6fdb36e2ca2e628c4e7acd8587b3d70",
+        "references/checklist.md": "4c73996ad4c4e70756f1319c261e01d10977d26c0050ebbee6e19ca513ed1fdb",
+        "references/cookies.md": "c9e837265926da8bf2adfac6fa9198f57a2140c6e4a83a037b1345f00f35bf31",
+        "references/cryptography.md": "5f9c2f1356189db66f948077467ac397b43b201f4f44b65669b24fdc86436fdb",
+        "references/filesystem.md": "9b7fb420c288bdccb4af2c9ba052429916dc139f14dce2f5cea0d2d1961c1180",
+        "references/injection.md": "041f2942b7e530ead2b098c5383abbe092469752a19fefe8840ecb0ca29f90a3",
+        "references/logging.md": "86ba80ebcbf521822d388db0229fb0d82645baf41ac1eafa6294132718eab5a8",
+        "references/memory-safety.md": "13d13a8207b28a7127fce6e291cf7bb6cbb4f0bf972ee9e951c060c887d236e8",
+        "references/network.md": "7971416f2eb50ecd187dabd8121b619abdb38dea825f4f41379a6079dbb12dd0",
+        "references/secrets.md": "81b1600445f73b24e68a916f3f38ddb80816ce63fc246c24af985d39d00a1249",
+        "references/third-party.md": "7c17628923152a646870f10fac0ab679709fe7cc98031fd1b31cd94dafba0cd2",
+        "references/threat-modeling.md": "e249413bd7ac9ed356d57333abada6dae2975242049dc55ef07a54bda1346326",
+        "SKILL.md": "8bcc0f7ff7d196aa498e0305b81c28f60c6e50a358626360f526c0cacc760bc4"
+      },
+      "installed_files": {
+        "agents/openai.yaml": "8619a54e8c098122a7f3881394f84ca89b684366e848233a29ad18b6ec363935",
+        "evals/evals.json": "88d584c25e5c8b9548ceac5e68d12f270a31dd9f9752554bfc9ed382eaee879f",
+        "references/architecture.md": "0596335d458de12b3e74704119b8d6deb6fdb36e2ca2e628c4e7acd8587b3d70",
+        "references/checklist.md": "4c73996ad4c4e70756f1319c261e01d10977d26c0050ebbee6e19ca513ed1fdb",
+        "references/cookies.md": "c9e837265926da8bf2adfac6fa9198f57a2140c6e4a83a037b1345f00f35bf31",
+        "references/cryptography.md": "5f9c2f1356189db66f948077467ac397b43b201f4f44b65669b24fdc86436fdb",
+        "references/filesystem.md": "9b7fb420c288bdccb4af2c9ba052429916dc139f14dce2f5cea0d2d1961c1180",
+        "references/injection.md": "041f2942b7e530ead2b098c5383abbe092469752a19fefe8840ecb0ca29f90a3",
+        "references/logging.md": "86ba80ebcbf521822d388db0229fb0d82645baf41ac1eafa6294132718eab5a8",
+        "references/memory-safety.md": "13d13a8207b28a7127fce6e291cf7bb6cbb4f0bf972ee9e951c060c887d236e8",
+        "references/network.md": "7971416f2eb50ecd187dabd8121b619abdb38dea825f4f41379a6079dbb12dd0",
+        "references/secrets.md": "81b1600445f73b24e68a916f3f38ddb80816ce63fc246c24af985d39d00a1249",
+        "references/third-party.md": "7c17628923152a646870f10fac0ab679709fe7cc98031fd1b31cd94dafba0cd2",
+        "references/threat-modeling.md": "e249413bd7ac9ed356d57333abada6dae2975242049dc55ef07a54bda1346326",
+        "SKILL.md": "b1a0a9f9a3ceaec5d693fdea58f9213c5004282d693f7582bfd8851edc24d13f"
+      }
+    },
+    "golang-concurrency": {
+      "group": "A",
+      "files": {
+        "evals/evals.json": "045fcac623f3549608df0409edfd7863e9580249ae447499266e3a3d96798959",
+        "references/channels-and-select.md": "3435dee63817a2829b48fbfbaebe25bbb448008d4d06e0e739c2f070b78328ab",
+        "references/pipelines.md": "c1b3f3dc4273370c61631328de11ec19b2fa1000c22ddff50d06bca059dd5d70",
+        "references/sync-primitives.md": "f54e4343942feef72b2f371e5b67156469f82fd2ea0e4f2634c957530926d6de",
+        "SKILL.md": "b56255b765a50c1052c5d71cd60ddb1c2ef643ce3b447aa195ba81f31d10bd1c"
+      },
+      "installed_files": {
+        "agents/openai.yaml": "8619a54e8c098122a7f3881394f84ca89b684366e848233a29ad18b6ec363935",
+        "evals/evals.json": "045fcac623f3549608df0409edfd7863e9580249ae447499266e3a3d96798959",
+        "references/channels-and-select.md": "3435dee63817a2829b48fbfbaebe25bbb448008d4d06e0e739c2f070b78328ab",
+        "references/pipelines.md": "c1b3f3dc4273370c61631328de11ec19b2fa1000c22ddff50d06bca059dd5d70",
+        "references/sync-primitives.md": "f54e4343942feef72b2f371e5b67156469f82fd2ea0e4f2634c957530926d6de",
+        "SKILL.md": "e9d55064a059780c52fdce6ba28ffb196939c74f160ce44a9b13d4ca37360827"
+      }
+    },
+    "golang-context": {
+      "group": "A",
+      "files": {
+        "evals/evals.json": "b53b95d0c3a8ade1da1c3ea7f2bec22bfd8da37b61cb77be050100ccba738a89",
+        "references/cancellation.md": "7d99f6982a0e397e42321791e8a39a63058bd0164ee6bd0ef1b4a17510be10c6",
+        "references/http-services.md": "a676622a134b7363ffced7d1e6e0b11acbee0c8e226140d428494b741a3819ab",
+        "references/values-tracing.md": "7ef49277791408380d3b8ad285a81fe7814f5d727c3950abae2958e6dd9058af",
+        "SKILL.md": "257a3e5a07d686ef617a59bc55e5b320665381e50dbc696d0aacc43aee687da2"
+      },
+      "installed_files": {
+        "agents/openai.yaml": "8619a54e8c098122a7f3881394f84ca89b684366e848233a29ad18b6ec363935",
+        "evals/evals.json": "b53b95d0c3a8ade1da1c3ea7f2bec22bfd8da37b61cb77be050100ccba738a89",
+        "references/cancellation.md": "7d99f6982a0e397e42321791e8a39a63058bd0164ee6bd0ef1b4a17510be10c6",
+        "references/http-services.md": "a676622a134b7363ffced7d1e6e0b11acbee0c8e226140d428494b741a3819ab",
+        "references/values-tracing.md": "7ef49277791408380d3b8ad285a81fe7814f5d727c3950abae2958e6dd9058af",
+        "SKILL.md": "fe9e5a87f8260b4682206fd0a8b93817437fa48dc0f229cb8371126b757e5e70"
+      }
+    },
+    "golang-testing": {
+      "group": "A",
+      "files": {
+        "evals/evals.json": "bc083e8d62ff1c23d9cd734f274a5733cfc0d30bb6356e03668dd3c67ff7c92e",
+        "references/benchmarks.md": "f9de0e2e50cbb8e28684da1f99ff15fa84779150b4a8deefdf97ea3345c871f1",
+        "references/coverage.md": "b2f7af52412b084cf353ff493941ad43276cae9d197470db2287b5d2c5a1aebf",
+        "references/examples.md": "40c070f0a83898edbc0c87c034fc2281d9c2b04e0514c94aa1ff07b802b575c5",
+        "references/helpers.md": "8c71d253a246e66b8249022c96d7e8892f5bfc2156b02a36673c321db2c843f4",
+        "references/http-testing.md": "39381274d7887651b86bde513085835f52860aa0832eb6f945f79c008f240e0f",
+        "references/integration-testing.md": "a29e725c58a1c2feaf16470db7eb4f8394aa36a476df92a792ac026c950d0b85",
+        "references/mocking.md": "65558f907dea483831aea4aca50b1d6f1b64f92803bc2446f6a550a6d6c5c33a",
+        "SKILL.md": "55eea3ed4536df0c95fc1247382d3027d45b1d1af0a94fc9de653debae5df0f2"
+      },
+      "installed_files": {
+        "agents/openai.yaml": "8619a54e8c098122a7f3881394f84ca89b684366e848233a29ad18b6ec363935",
+        "evals/evals.json": "bc083e8d62ff1c23d9cd734f274a5733cfc0d30bb6356e03668dd3c67ff7c92e",
+        "references/benchmarks.md": "f9de0e2e50cbb8e28684da1f99ff15fa84779150b4a8deefdf97ea3345c871f1",
+        "references/coverage.md": "b2f7af52412b084cf353ff493941ad43276cae9d197470db2287b5d2c5a1aebf",
+        "references/examples.md": "40c070f0a83898edbc0c87c034fc2281d9c2b04e0514c94aa1ff07b802b575c5",
+        "references/helpers.md": "8c71d253a246e66b8249022c96d7e8892f5bfc2156b02a36673c321db2c843f4",
+        "references/http-testing.md": "39381274d7887651b86bde513085835f52860aa0832eb6f945f79c008f240e0f",
+        "references/integration-testing.md": "a29e725c58a1c2feaf16470db7eb4f8394aa36a476df92a792ac026c950d0b85",
+        "references/mocking.md": "65558f907dea483831aea4aca50b1d6f1b64f92803bc2446f6a550a6d6c5c33a",
+        "SKILL.md": "fe51eb6dd71c4adfafe943187fd9c08c0f42d67439c52474db28df4670486ba6"
+      }
+    },
+    "golang-lint": {
+      "group": "A",
+      "files": {
+        "assets/.golangci.yml": "ad4284596f57d66bcdbc92687011a4dce1699cc684283eb172cd3dd91047646e",
+        "evals/evals.json": "b075c4894cb663b067b5cfeaf5525ed49af1dffda24b36c458d09c2f40ffb90a",
+        "references/linter-reference.md": "0858adf98ca9cdcd8f614176008a58098a267bdbc4a5de976d7180e8a11e4f18",
+        "references/nolint-directives.md": "be12adeb536e134398243b8cee0433eb27fefabae3f13092b826198c5e461067",
+        "SKILL.md": "45e510222626ab4367e7831dcef2560c9c54a7f489ec4219eec89f4fdc4e6930"
+      },
+      "installed_files": {
+        "agents/openai.yaml": "8619a54e8c098122a7f3881394f84ca89b684366e848233a29ad18b6ec363935",
+        "assets/.golangci.yml": "ad4284596f57d66bcdbc92687011a4dce1699cc684283eb172cd3dd91047646e",
+        "evals/evals.json": "b075c4894cb663b067b5cfeaf5525ed49af1dffda24b36c458d09c2f40ffb90a",
+        "references/linter-reference.md": "0858adf98ca9cdcd8f614176008a58098a267bdbc4a5de976d7180e8a11e4f18",
+        "references/nolint-directives.md": "be12adeb536e134398243b8cee0433eb27fefabae3f13092b826198c5e461067",
+        "SKILL.md": "94142fa36be6c4c2aedd461f6be674d5a38a52ec572bf6f0c46241f286be71aa"
+      }
+    },
+    "golang-troubleshooting": {
+      "group": "A",
+      "files": {
+        "evals/evals.json": "a15b4ce5f5f0d4d2fe0590ba2207e13e2f23bba4e11d1743bd89ddda87146dde",
+        "references/code-review-flags.md": "577b683e055c3880fa7233e24f19cddbd4aa65731be72d50211d873e202bfc43",
+        "references/common-go-bugs.md": "311375f50e79bfc63d48e06565b784fba060609a0bc787f6e106eb1f48fa6fbc",
+        "references/compilation.md": "b6ecaf7c6f4e2f4635e3c90d02d2cd55fe150c9826f77061a70a03e39ea669ec",
+        "references/concurrency-debug.md": "7fef337f937d182314200c3f40b38b3954214df190b1b9dccbdd129f22986d2f",
+        "references/diagnostic-tools.md": "36169dd6972e2e7230d55e8bbf760a6d51f93cc36811d9d80ab94539746d38df",
+        "references/methodology.md": "2e90eb15812661d06f3c90d5f9c697a3ca292a6667e574a07479626b90c9d48e",
+        "references/performance-debug.md": "c26e03f1985b156876f31bad0f7541da13d6968b622a24c26bb7565b30305e62",
+        "references/pprof.md": "039fa03a054737439e69e59d4ebf62c87e711e47c2698941c30bd73890aec5bf",
+        "references/production-debug.md": "6bbb0e2f3f249bd9a350f6c1f50b48a4d3d93fee9b1de9f2fb4f6ba8bf739f03",
+        "references/testing-debug.md": "6e499a4f8a96eddb9314ec396e1cb8bf98457085845acb6ab327c49e39f9d34a",
+        "SKILL.md": "a94def5ae84dd581536e5fdd64b1c22bd7f9683f3173d638830edb60697aa8e8"
+      },
+      "installed_files": {
+        "agents/openai.yaml": "8619a54e8c098122a7f3881394f84ca89b684366e848233a29ad18b6ec363935",
+        "evals/evals.json": "a15b4ce5f5f0d4d2fe0590ba2207e13e2f23bba4e11d1743bd89ddda87146dde",
+        "references/code-review-flags.md": "577b683e055c3880fa7233e24f19cddbd4aa65731be72d50211d873e202bfc43",
+        "references/common-go-bugs.md": "311375f50e79bfc63d48e06565b784fba060609a0bc787f6e106eb1f48fa6fbc",
+        "references/compilation.md": "b6ecaf7c6f4e2f4635e3c90d02d2cd55fe150c9826f77061a70a03e39ea669ec",
+        "references/concurrency-debug.md": "7fef337f937d182314200c3f40b38b3954214df190b1b9dccbdd129f22986d2f",
+        "references/diagnostic-tools.md": "36169dd6972e2e7230d55e8bbf760a6d51f93cc36811d9d80ab94539746d38df",
+        "references/methodology.md": "2e90eb15812661d06f3c90d5f9c697a3ca292a6667e574a07479626b90c9d48e",
+        "references/performance-debug.md": "c26e03f1985b156876f31bad0f7541da13d6968b622a24c26bb7565b30305e62",
+        "references/pprof.md": "039fa03a054737439e69e59d4ebf62c87e711e47c2698941c30bd73890aec5bf",
+        "references/production-debug.md": "6bbb0e2f3f249bd9a350f6c1f50b48a4d3d93fee9b1de9f2fb4f6ba8bf739f03",
+        "references/testing-debug.md": "6e499a4f8a96eddb9314ec396e1cb8bf98457085845acb6ab327c49e39f9d34a",
+        "SKILL.md": "71feb174baeb57e6c826bd79d268f53683bc0c44543326ad5e7b8c007b10e4d4"
+      }
+    },
+    "golang-gopls": {
+      "group": "A",
+      "files": {
+        "references/cli.md": "9f4d5c832a83d61ae04403fcd521b548db29481c37b3fb4aadf23f6bc924de07",
+        "references/features.md": "4519f0d37f8826f80824b10cd5892da0f0babb9934efecc083f81a70b5e4771f",
+        "references/matrix.md": "cfa641a7389136377f7841ca471f887e85348597de87b05ecb96e4a4ffdda87f",
+        "references/mcp.md": "982d7e0d8c3ae3de10451a9e0d05847105c71e9d71c70b4ccc052cfa7b6516a6",
+        "references/settings.md": "443d18fcc1e1c75dfbc99fb9fb5c5b5fcc3fb703648847be8ca68a92d2eb0896",
+        "SKILL.md": "198024b700b0011d5caccff80031b975c060c2cdb6bdf980a371bf0533fa34a7"
+      },
+      "installed_files": {
+        "agents/openai.yaml": "8619a54e8c098122a7f3881394f84ca89b684366e848233a29ad18b6ec363935",
+        "references/cli.md": "9f4d5c832a83d61ae04403fcd521b548db29481c37b3fb4aadf23f6bc924de07",
+        "references/features.md": "4519f0d37f8826f80824b10cd5892da0f0babb9934efecc083f81a70b5e4771f",
+        "references/matrix.md": "cfa641a7389136377f7841ca471f887e85348597de87b05ecb96e4a4ffdda87f",
+        "references/mcp.md": "982d7e0d8c3ae3de10451a9e0d05847105c71e9d71c70b4ccc052cfa7b6516a6",
+        "references/settings.md": "443d18fcc1e1c75dfbc99fb9fb5c5b5fcc3fb703648847be8ca68a92d2eb0896",
+        "SKILL.md": "3c278f28f228ea0eaa514e1cb6af7416f115c1747a0028b91484ded4942e2e7e"
+      }
+    },
+    "golang-data-structures": {
+      "group": "A",
+      "files": {
+        "evals/evals.json": "68608da5a4f672da5e288dfa57f3052a3016246f942c7bd16bb0a46c78002fd8",
+        "references/containers.md": "4b0a3879c55cb7f6a8959c07b93daf6c3a412b0b810c9ec3a099044023b2034e",
+        "references/generics.md": "6b7bea407c3635b196c9056cbe151cb42d33ae0f4bc1f94028407ec13c60638e",
+        "references/map-internals.md": "718881bc6009467ae809efebf1c9e5b16c6e25ce3233e12db6129ae2731e947e",
+        "references/pointers.md": "c7682eb6beb38e2174df94e26deb95e138be6b80557eb76167312148efd732df",
+        "references/slice-internals.md": "f01914bc8e5e61a071efcc0000dfe4de3b247c12700361f4c3fdb1e871898846",
+        "SKILL.md": "36d8047541529a0254d3221b53c0d3b7c6c10b499a545201be55e0f0be510952"
+      },
+      "installed_files": {
+        "agents/openai.yaml": "8619a54e8c098122a7f3881394f84ca89b684366e848233a29ad18b6ec363935",
+        "evals/evals.json": "68608da5a4f672da5e288dfa57f3052a3016246f942c7bd16bb0a46c78002fd8",
+        "references/containers.md": "4b0a3879c55cb7f6a8959c07b93daf6c3a412b0b810c9ec3a099044023b2034e",
+        "references/generics.md": "6b7bea407c3635b196c9056cbe151cb42d33ae0f4bc1f94028407ec13c60638e",
+        "references/map-internals.md": "718881bc6009467ae809efebf1c9e5b16c6e25ce3233e12db6129ae2731e947e",
+        "references/pointers.md": "c7682eb6beb38e2174df94e26deb95e138be6b80557eb76167312148efd732df",
+        "references/slice-internals.md": "f01914bc8e5e61a071efcc0000dfe4de3b247c12700361f4c3fdb1e871898846",
+        "SKILL.md": "7d6b971184656c65de23da2e78bf5c6905641690e81134ab921714171ef43f1b"
+      }
+    },
+    "golang-structs-interfaces": {
+      "group": "A",
+      "files": {
+        "evals/evals.json": "34958c0025acf30e85256db718638c03c76dedd3070e56e7c81608c946390219",
+        "references/struct-fields.md": "fc40bb1979f11cd8f9d20361d524a26a233447fa94b6ec3ccad71a5cebfaec2a",
+        "references/type-assertions.md": "02860e00115d6b1256c4accedea33b6544746bc6b1429c2a5fc8ed735692b48e",
+        "SKILL.md": "0bc93e1e86c3cf24571205b6fdd773a23df1b34366e7f639a9530d6984117601"
+      },
+      "installed_files": {
+        "agents/openai.yaml": "8619a54e8c098122a7f3881394f84ca89b684366e848233a29ad18b6ec363935",
+        "evals/evals.json": "34958c0025acf30e85256db718638c03c76dedd3070e56e7c81608c946390219",
+        "references/struct-fields.md": "fc40bb1979f11cd8f9d20361d524a26a233447fa94b6ec3ccad71a5cebfaec2a",
+        "references/type-assertions.md": "02860e00115d6b1256c4accedea33b6544746bc6b1429c2a5fc8ed735692b48e",
+        "SKILL.md": "ca470d950b7423315c65b5f9534e692e52a4f36ad146b93e0eeebb192d8ef526"
+      }
+    },
+    "golang-documentation": {
+      "group": "A",
+      "files": {
+        "assets/templates/CHANGELOG.md": "1b71c5ec952e6ad9df54301023e9b8e32c84518d5a12205bdd4fc66548a3310c",
+        "assets/templates/CONTRIBUTING.md": "9f48475bf8e7456260ad386470577f5fba9466df0cdc888bedfb55d6e1188dd5",
+        "assets/templates/llms.txt": "05e60afffcaff165cb416506f6b45f80143ab5453ab33a55499ab56d279b97d9",
+        "assets/templates/README.md": "4055e43b9c0fdacf84a8fddd503968cc0d49e7555a642979ae81292fb65a47f1",
+        "evals/evals.json": "b23fac4a14e8d909e4efa402a23c5585efc33ef2079f5d79992e27f1da4654cf",
+        "references/application.md": "e9b8ddbfb0aef0090fdd29f41a020b829738a6cb504aa4276fcddff13f4767a5",
+        "references/code-comments.md": "b30a972c758fe5f75615c91024cd2189a12e2d68f61128026c4e4809fc1679f4",
+        "references/library.md": "3cb75b20e9965d9f0c0e3a2a1f17d37d7d2d0278ac704dc4b15f9eed1620dd1c",
+        "references/project-docs.md": "4eb0ec8988743d95b0d6c701a6070e74c54c40a9d775c074577032764c125199",
+        "SKILL.md": "a313e2a0037731074ae7e12a14727e42396ea397d84f53873400d3fc5c44fb2d"
+      },
+      "installed_files": {
+        "agents/openai.yaml": "8619a54e8c098122a7f3881394f84ca89b684366e848233a29ad18b6ec363935",
+        "assets/templates/CHANGELOG.md": "1b71c5ec952e6ad9df54301023e9b8e32c84518d5a12205bdd4fc66548a3310c",
+        "assets/templates/CONTRIBUTING.md": "9f48475bf8e7456260ad386470577f5fba9466df0cdc888bedfb55d6e1188dd5",
+        "assets/templates/llms.txt": "05e60afffcaff165cb416506f6b45f80143ab5453ab33a55499ab56d279b97d9",
+        "assets/templates/README.md": "4055e43b9c0fdacf84a8fddd503968cc0d49e7555a642979ae81292fb65a47f1",
+        "evals/evals.json": "b23fac4a14e8d909e4efa402a23c5585efc33ef2079f5d79992e27f1da4654cf",
+        "references/application.md": "e9b8ddbfb0aef0090fdd29f41a020b829738a6cb504aa4276fcddff13f4767a5",
+        "references/code-comments.md": "b30a972c758fe5f75615c91024cd2189a12e2d68f61128026c4e4809fc1679f4",
+        "references/library.md": "3cb75b20e9965d9f0c0e3a2a1f17d37d7d2d0278ac704dc4b15f9eed1620dd1c",
+        "references/project-docs.md": "4eb0ec8988743d95b0d6c701a6070e74c54c40a9d775c074577032764c125199",
+        "SKILL.md": "9d10bc07361a30d0e33dc473611ce8b9ce5448182ad38fb0f3adeb628cf94fb8"
+      }
+    },
+    "golang-continuous-integration": {
+      "group": "A",
+      "files": {
+        "assets/claude-code-review.yml": "44dc118833565ccc5540a6544356c1c62920b819ca493b542a9eece3584693c6",
+        "assets/codecov.yml": "6fd9fcc281e3c5e78636e8722c5ce6dfa235bc86319a645629f79d0557235365",
+        "assets/codeql-config.yml": "e656a4bfd48df5172a6bbc627ccc9cc9afee27317c37444c19cd24b0a37c0cf7",
+        "assets/copilot-review-instructions.md": "87fc280e934242e129e66a2f51a85de22cec15fd3f553ddc02881ef9aa673fff",
+        "assets/dependabot-auto-merge.yml": "bf51d1604c483aa4fe68be861570203b77cacc06b08ec6f1b448b1641ee87d76",
+        "assets/dependabot.yml": "e0e1bc6589c17fa8bac435fb7c8087dabf36da82fd4ce6c7fbd0017353237c3e",
+        "assets/docker.yml": "96e9b83fdde1f01ed0ac63d602395fd57aa2918b340f66d741d3d5785ef60db1",
+        "assets/goreleaser-cli.yml": "71443d4d6baca1aa79601ef18faa48a6557caf889036556633d4518a1e141e50",
+        "assets/goreleaser-lib.yml": "55962e46bab389746bebc001b08ba242766fa0a79c36aa925561aa8899a76cd8",
+        "assets/goreleaser-monorepo.yml": "3726554731cd2baa084aea59b177637cc8c981f8fcc75040e53b87fc86978162",
+        "assets/integration.yml": "66d55a41c058e816d851d4dc2099b8e3d299d95b85897abb912f0652c86b01b8",
+        "assets/lint.yml": "f97f43de7ea822d7906d1d360f321826933ec288cb6369d95be19fcad14a0dfc",
+        "assets/release.yml": "a99ceea9da5f6de14fb97f89c3edddbd6e5167015528554d129261db4f61c05e",
+        "assets/renovate.json": "56eebfd3354023f302c10758023b1604f50da79ad035124dfd416ac5ed32ebcd",
+        "assets/security.yml": "fe3de422399a07791960e058974c76d2ce27d5e0a347ae0a24be5cf1eebec987",
+        "assets/test.yml": "4f6eb041bd997f941335b95f22c4c63d41b8ca01ed6e88b4902bdc346e132de8",
+        "evals/evals.json": "f0e334bbc94d27b89b0c6a885638a7319faddac69a4dff0453dcb00515dc53e7",
+        "references/repo-security.md": "925b28aa8119f497c0a08cb7547d7d9bdcf4cc0831a0fb43ee08a628ae28b8bc",
+        "SKILL.md": "106f80606011f563fb56565095d08f3eb21f06771577a124c8522088671b9b3b"
+      },
+      "installed_files": {
+        "agents/openai.yaml": "8619a54e8c098122a7f3881394f84ca89b684366e848233a29ad18b6ec363935",
+        "assets/claude-code-review.yml": "44dc118833565ccc5540a6544356c1c62920b819ca493b542a9eece3584693c6",
+        "assets/codecov.yml": "6fd9fcc281e3c5e78636e8722c5ce6dfa235bc86319a645629f79d0557235365",
+        "assets/codeql-config.yml": "e656a4bfd48df5172a6bbc627ccc9cc9afee27317c37444c19cd24b0a37c0cf7",
+        "assets/copilot-review-instructions.md": "87fc280e934242e129e66a2f51a85de22cec15fd3f553ddc02881ef9aa673fff",
+        "assets/dependabot-auto-merge.yml": "bf51d1604c483aa4fe68be861570203b77cacc06b08ec6f1b448b1641ee87d76",
+        "assets/dependabot.yml": "e0e1bc6589c17fa8bac435fb7c8087dabf36da82fd4ce6c7fbd0017353237c3e",
+        "assets/docker.yml": "96e9b83fdde1f01ed0ac63d602395fd57aa2918b340f66d741d3d5785ef60db1",
+        "assets/goreleaser-cli.yml": "71443d4d6baca1aa79601ef18faa48a6557caf889036556633d4518a1e141e50",
+        "assets/goreleaser-lib.yml": "55962e46bab389746bebc001b08ba242766fa0a79c36aa925561aa8899a76cd8",
+        "assets/goreleaser-monorepo.yml": "3726554731cd2baa084aea59b177637cc8c981f8fcc75040e53b87fc86978162",
+        "assets/integration.yml": "66d55a41c058e816d851d4dc2099b8e3d299d95b85897abb912f0652c86b01b8",
+        "assets/lint.yml": "f97f43de7ea822d7906d1d360f321826933ec288cb6369d95be19fcad14a0dfc",
+        "assets/release.yml": "a99ceea9da5f6de14fb97f89c3edddbd6e5167015528554d129261db4f61c05e",
+        "assets/renovate.json": "56eebfd3354023f302c10758023b1604f50da79ad035124dfd416ac5ed32ebcd",
+        "assets/security.yml": "fe3de422399a07791960e058974c76d2ce27d5e0a347ae0a24be5cf1eebec987",
+        "assets/test.yml": "4f6eb041bd997f941335b95f22c4c63d41b8ca01ed6e88b4902bdc346e132de8",
+        "evals/evals.json": "f0e334bbc94d27b89b0c6a885638a7319faddac69a4dff0453dcb00515dc53e7",
+        "references/repo-security.md": "925b28aa8119f497c0a08cb7547d7d9bdcf4cc0831a0fb43ee08a628ae28b8bc",
+        "SKILL.md": "6397917678d6a2b780b34015b69a0f32ad3ffc516c60c776b98dc1f36837ac71"
+      }
+    },
+    "golang-performance": {
+      "group": "B",
+      "files": {
+        "assets/prometheus-alerts.yml": "778e10629d29d25acceac196bbf58a88a6939ff6b5366752da9327a4aaa78637",
+        "evals/evals.json": "72ed06f9e29d4d3b84d8d368ccc69433fd7879d40b4a62201e0e9f804cef5793",
+        "references/caching.md": "21a31011d07b0d99185b50b45690eba929bc5af450dc51e208fa759f8fd92a61",
+        "references/cpu.md": "d3553dc0e37649fa41230095007abd0e727d0122e0a2594cba0dd296c16b98b3",
+        "references/io-networking.md": "11c3fa80885b5745a9db7c77d72bcd02b36af169bfb9762213fb9421b4237827",
+        "references/memory.md": "ffad35427a22817c090a0f6765b012f55c58630c9df6edc6f0ed613fe2b9e08d",
+        "references/observability.md": "f3382851dbf07fad60934d5f66cdab8a310d2f336a5b0b6a9928eafc17862922",
+        "references/runtime.md": "9e2d912c6e43bec70e809a1b5e6eee4866f9ac5d30540a2897b7d731808b60f2",
+        "SKILL.md": "80a4e7aa3b343777fd24f6e28141bb1329b6daeb9aa4f69b163b02a4b2155c50"
+      },
+      "installed_files": {
+        "agents/openai.yaml": "a1499d95abd8447558c535fe5554adcc3c9b988a0a39264a6283d430effe1e94",
+        "assets/prometheus-alerts.yml": "778e10629d29d25acceac196bbf58a88a6939ff6b5366752da9327a4aaa78637",
+        "evals/evals.json": "72ed06f9e29d4d3b84d8d368ccc69433fd7879d40b4a62201e0e9f804cef5793",
+        "references/caching.md": "21a31011d07b0d99185b50b45690eba929bc5af450dc51e208fa759f8fd92a61",
+        "references/cpu.md": "d3553dc0e37649fa41230095007abd0e727d0122e0a2594cba0dd296c16b98b3",
+        "references/io-networking.md": "11c3fa80885b5745a9db7c77d72bcd02b36af169bfb9762213fb9421b4237827",
+        "references/memory.md": "ffad35427a22817c090a0f6765b012f55c58630c9df6edc6f0ed613fe2b9e08d",
+        "references/observability.md": "f3382851dbf07fad60934d5f66cdab8a310d2f336a5b0b6a9928eafc17862922",
+        "references/runtime.md": "9e2d912c6e43bec70e809a1b5e6eee4866f9ac5d30540a2897b7d731808b60f2",
+        "SKILL.md": "1e26b841bfef91c62b73f41a1383edcbd4649eb2f942ae498bc2627e620ecb80"
+      }
+    },
+    "golang-benchmark": {
+      "group": "B",
+      "files": {
+        "evals/evals.json": "8eabb8fbacea945c0f4d855073e39db1727a9193b9f14c6c4c8a61b4b2164d56",
+        "references/benchstat.md": "5df4026b3b1bb628ee25afaea804ee00560461bcca83e81caadc32712a6124b1",
+        "references/ci-regression.md": "ff02834abf7ccace3d478a14241af28843e355eaba1f89d26099eb0511de8624",
+        "references/compiler-analysis.md": "05e1df8abaa28fba34720bae61ef0fd7d81fc27cc338b2b350662f90dfd640ab",
+        "references/investigation-session.md": "86c060fa9add260d8dc77e3919d97d410ca0ea09c47d8f0af44ab8a042eac8a7",
+        "references/pprof.md": "49c7c969499cd001f7d6f9345d66057475290d30576a5d62b5c0d278ca0aee57",
+        "references/prometheus-go-metrics.md": "b52eb0ba6bfaa467dce1013bf5dd46ea9f363fd78276acd647b24a57e4a9219b",
+        "references/tools.md": "d236bd750d0b612ba46a79267ab1cd5c241eda97a35163b53882031fb537902c",
+        "references/trace.md": "626f155a2dd7d7364461bed0fb195ebd4286d526b5d52c4bc39cf39763820fba",
+        "SKILL.md": "35f74a20f926c629af3ca39936fb9bf2a9b52ca55f8a3ea1476d32b08d328a70"
+      },
+      "installed_files": {
+        "agents/openai.yaml": "a1499d95abd8447558c535fe5554adcc3c9b988a0a39264a6283d430effe1e94",
+        "evals/evals.json": "8eabb8fbacea945c0f4d855073e39db1727a9193b9f14c6c4c8a61b4b2164d56",
+        "references/benchstat.md": "5df4026b3b1bb628ee25afaea804ee00560461bcca83e81caadc32712a6124b1",
+        "references/ci-regression.md": "ff02834abf7ccace3d478a14241af28843e355eaba1f89d26099eb0511de8624",
+        "references/compiler-analysis.md": "05e1df8abaa28fba34720bae61ef0fd7d81fc27cc338b2b350662f90dfd640ab",
+        "references/investigation-session.md": "86c060fa9add260d8dc77e3919d97d410ca0ea09c47d8f0af44ab8a042eac8a7",
+        "references/pprof.md": "49c7c969499cd001f7d6f9345d66057475290d30576a5d62b5c0d278ca0aee57",
+        "references/prometheus-go-metrics.md": "b52eb0ba6bfaa467dce1013bf5dd46ea9f363fd78276acd647b24a57e4a9219b",
+        "references/tools.md": "d236bd750d0b612ba46a79267ab1cd5c241eda97a35163b53882031fb537902c",
+        "references/trace.md": "626f155a2dd7d7364461bed0fb195ebd4286d526b5d52c4bc39cf39763820fba",
+        "SKILL.md": "abf2b166eb00387c9de6d38dc19c0c66f3bd5ede18e73082ed87fb8da8fb23bf"
+      }
+    },
+    "golang-observability": {
+      "group": "B",
+      "files": {
+        "evals/evals.json": "53fbb12e680eefb353b8c24087a16f4f437740e2b3e94cd2c517372025e6dc3e",
+        "references/alerting.md": "a1064b49a48f5bb0806ed134fcefa687cb8f401650114a0aa6120dcf21de8a46",
+        "references/dashboards.md": "fac3c553d5b824db3c9a1f569a514248d556cffeebe22a61609090808eaa79f1",
+        "references/logging.md": "62c7fd0060f26eba487d40e0b34d619e626ed6c554236ede2281a40b11e281a5",
+        "references/metrics.md": "727045e1130ec75896ee5602115729edb0457667df7a7ad61ef46733da1743bb",
+        "references/profiling.md": "5d883af7efa90ffbd54a1e4f40d1b488a68cea123e5a55e536434b831fe86a17",
+        "references/rum.md": "fb5ef8c33994f75ce8ca0fe6b20db0e0ef699e243e00d813e76328958b85d898",
+        "references/tracing.md": "6caccbf8769b3621a6018f6a238797f39c16676464d3e5a339e4de713f64c5d6",
+        "SKILL.md": "539f7fc73370e01fad2cbe5a67a63a651bd40242bc00c920b3f1cbf781023185"
+      },
+      "installed_files": {
+        "agents/openai.yaml": "a1499d95abd8447558c535fe5554adcc3c9b988a0a39264a6283d430effe1e94",
+        "evals/evals.json": "53fbb12e680eefb353b8c24087a16f4f437740e2b3e94cd2c517372025e6dc3e",
+        "references/alerting.md": "a1064b49a48f5bb0806ed134fcefa687cb8f401650114a0aa6120dcf21de8a46",
+        "references/dashboards.md": "fac3c553d5b824db3c9a1f569a514248d556cffeebe22a61609090808eaa79f1",
+        "references/logging.md": "62c7fd0060f26eba487d40e0b34d619e626ed6c554236ede2281a40b11e281a5",
+        "references/metrics.md": "727045e1130ec75896ee5602115729edb0457667df7a7ad61ef46733da1743bb",
+        "references/profiling.md": "5d883af7efa90ffbd54a1e4f40d1b488a68cea123e5a55e536434b831fe86a17",
+        "references/rum.md": "fb5ef8c33994f75ce8ca0fe6b20db0e0ef699e243e00d813e76328958b85d898",
+        "references/tracing.md": "6caccbf8769b3621a6018f6a238797f39c16676464d3e5a339e4de713f64c5d6",
+        "SKILL.md": "70b11b208bf3d05e48890aefd8f177dffcf62bd94846b26906d296792e44ebc7"
+      }
+    },
+    "golang-refactoring": {
+      "group": "B",
+      "files": {
+        "references/catalog.md": "79412f57d36f884530e0312018110a7cbca989c4a83ebe3142239e7815626dc4",
+        "references/go-tooling.md": "1e6756d85ecff0ef18c5998d71bad0e1de8d36cafc9b1d30fa8533919f28ce27",
+        "references/safety-net.md": "6a19cf4d801a786501d485abb9b3850eafe46e4675518fc685ef7127ca03c066",
+        "references/structural.md": "73bb125f15602bf5a7fce0b92116829c8ccdfdf606218e9573eae474eac7c6db",
+        "references/workflow.md": "1944c778e93d63dc3789dda67b5e07e79ac067eb2116843be691b11121ca6fe8",
+        "SKILL.md": "4b297f823861d6620a5034a3a26b2d4875b1153ab123f2c5059f7ddb73939355"
+      },
+      "installed_files": {
+        "agents/openai.yaml": "a1499d95abd8447558c535fe5554adcc3c9b988a0a39264a6283d430effe1e94",
+        "references/catalog.md": "79412f57d36f884530e0312018110a7cbca989c4a83ebe3142239e7815626dc4",
+        "references/go-tooling.md": "1e6756d85ecff0ef18c5998d71bad0e1de8d36cafc9b1d30fa8533919f28ce27",
+        "references/safety-net.md": "6a19cf4d801a786501d485abb9b3850eafe46e4675518fc685ef7127ca03c066",
+        "references/structural.md": "73bb125f15602bf5a7fce0b92116829c8ccdfdf606218e9573eae474eac7c6db",
+        "references/workflow.md": "1944c778e93d63dc3789dda67b5e07e79ac067eb2116843be691b11121ca6fe8",
+        "SKILL.md": "e5b85309387c31bc4f21e39622dead89c882f824b53863f84a9ca349b1c2751b"
+      }
+    },
+    "golang-modernize": {
+      "group": "B",
+      "files": {
+        "evals/evals.json": "e923a941e050165dbffc51553aa8f6952715fbf81c89b9c9f4e52d6711ec7a91",
+        "references/tooling.md": "4521eb3455c40f2cd59da2613e0623c871fbcd3993fa69b70dbafdc0c15e3bd9",
+        "references/versions.md": "01bfbb8e86318eae4a9faf7d6b6010a6aa2686ea958b5a5c185f66346df8ced4",
+        "SKILL.md": "4690bd30545ecd8bd4af278684773c2cde19981aae5dd97ba45a90f5ea560c60"
+      },
+      "installed_files": {
+        "agents/openai.yaml": "a1499d95abd8447558c535fe5554adcc3c9b988a0a39264a6283d430effe1e94",
+        "evals/evals.json": "e923a941e050165dbffc51553aa8f6952715fbf81c89b9c9f4e52d6711ec7a91",
+        "references/tooling.md": "4521eb3455c40f2cd59da2613e0623c871fbcd3993fa69b70dbafdc0c15e3bd9",
+        "references/versions.md": "01bfbb8e86318eae4a9faf7d6b6010a6aa2686ea958b5a5c185f66346df8ced4",
+        "SKILL.md": "b0e0a8c30094baa5326ea2efc73485150c8803527bd457a0c4585fa537745102"
+      }
+    },
+    "golang-dependency-management": {
+      "group": "B",
+      "files": {
+        "evals/evals.json": "5770c0d59bc309930ba8f3c121f81c6a9afae42d2939f157004bd05a0fc566f4",
+        "references/auditing.md": "7edc2ee2e5a55a764e9a7dc73c482d197207722bd643362ab1d3cf5fa1687ec2",
+        "references/automated-updates.md": "6ce7926a2f895fc2ccca7735521902f2575c73cf919c2788fb3bf740fb868b7b",
+        "references/conflicts.md": "a3f9bc0f606b9395f3f4675bf6085b85a9a53efd3fc5fbd108e4954412654121",
+        "references/versioning.md": "2c24099d6a648a93c8801521d698727bafd566fc4fea31b349f8398ee0f96860",
+        "references/visualization.md": "b23c9cff41abf43887224ab391b2f4e43a5f2e0f967246ebc480e0491190d3bd",
+        "references/workspaces.md": "317022b4f20c2c311eaf9889ffa03be1853e02bfc027fc2780826593a41d7caf",
+        "SKILL.md": "adedc0f78b8a469b8398434b8a9f373a380e50cf3a8a5a7974bb3f4a24c6166b"
+      },
+      "installed_files": {
+        "agents/openai.yaml": "a1499d95abd8447558c535fe5554adcc3c9b988a0a39264a6283d430effe1e94",
+        "evals/evals.json": "5770c0d59bc309930ba8f3c121f81c6a9afae42d2939f157004bd05a0fc566f4",
+        "references/auditing.md": "7edc2ee2e5a55a764e9a7dc73c482d197207722bd643362ab1d3cf5fa1687ec2",
+        "references/automated-updates.md": "6ce7926a2f895fc2ccca7735521902f2575c73cf919c2788fb3bf740fb868b7b",
+        "references/conflicts.md": "a3f9bc0f606b9395f3f4675bf6085b85a9a53efd3fc5fbd108e4954412654121",
+        "references/versioning.md": "2c24099d6a648a93c8801521d698727bafd566fc4fea31b349f8398ee0f96860",
+        "references/visualization.md": "b23c9cff41abf43887224ab391b2f4e43a5f2e0f967246ebc480e0491190d3bd",
+        "references/workspaces.md": "317022b4f20c2c311eaf9889ffa03be1853e02bfc027fc2780826593a41d7caf",
+        "SKILL.md": "d2d0468c94bff11f3c981205991cb0bbcc5ed8f1a6d673a00f2e20ea674d5ed9"
+      }
+    },
+    "golang-project-layout": {
+      "group": "B",
+      "files": {
+        "assets/.gitignore": "e4c2672f86a9d58a16813d8e81db033ed7d29c9b89493c4f6b9b137f686cb78a",
+        "assets/Makefile": "27d41a1b5f8b7ff5451f5dfca7e934185df5754f834d86d8b5dec7ce08e0f9ea",
+        "evals/evals.json": "d27071f04918e4e7808e72117c6ffb3d9e130e257273ecdd52f5d4080d043752",
+        "references/config.md": "4e0d6440110bba5a77434dd19ffc69f7b4ff3da2bec2a06e06bb100fe34003c1",
+        "references/directory-layouts.md": "fc36907c26eedaa5ca38105764bc76256d077c6a9bf0eb6e9fda440ec0b33bb5",
+        "references/testing-layout.md": "e94120a0fea89aa5ede1f41a2bcfe33b1ae06309568b7ab608388579c3f7c80a",
+        "references/workspaces.md": "f65f5b1b88bffb48843f754ef25e5a7ade23991481a9183c9005bb66e01af68f",
+        "SKILL.md": "d23c793c974a868906a95e5ac53fd077ba9630410bb7352d323697a29156c20a"
+      },
+      "installed_files": {
+        "agents/openai.yaml": "a1499d95abd8447558c535fe5554adcc3c9b988a0a39264a6283d430effe1e94",
+        "assets/.gitignore": "e4c2672f86a9d58a16813d8e81db033ed7d29c9b89493c4f6b9b137f686cb78a",
+        "assets/Makefile": "27d41a1b5f8b7ff5451f5dfca7e934185df5754f834d86d8b5dec7ce08e0f9ea",
+        "evals/evals.json": "d27071f04918e4e7808e72117c6ffb3d9e130e257273ecdd52f5d4080d043752",
+        "references/config.md": "4e0d6440110bba5a77434dd19ffc69f7b4ff3da2bec2a06e06bb100fe34003c1",
+        "references/directory-layouts.md": "fc36907c26eedaa5ca38105764bc76256d077c6a9bf0eb6e9fda440ec0b33bb5",
+        "references/testing-layout.md": "e94120a0fea89aa5ede1f41a2bcfe33b1ae06309568b7ab608388579c3f7c80a",
+        "references/workspaces.md": "f65f5b1b88bffb48843f754ef25e5a7ade23991481a9183c9005bb66e01af68f",
+        "SKILL.md": "3087e14e333339909046b0c26c151e64127918ee9a13a1c868a11a1c11fc7da9"
+      }
+    },
+    "golang-design-patterns": {
+      "group": "B",
+      "files": {
+        "evals/evals.json": "7d2d8f0cfe749f3c4af88885c62ce27157c43576cc0550811b691c9fc23722b1",
+        "references/architecture.md": "c8a790ed9e180b52a412455bae24e7f0e68c6e605ba3acd90ab35cd16fb813eb",
+        "references/clean-architecture.md": "b4625aa00c641fb106bf5cdabab38f70146f746a4d244f68a71b2b8bd6c7d268",
+        "references/data-handling.md": "72d78bf015637c7da90c3e298c1df89b20149421006d3dfd03e5f910212c9ce5",
+        "references/ddd.md": "bcd8382c1369bf505cb8422f83b46bd05e11f4587b6a173ca7eaa1a1a55080e6",
+        "references/hexagonal-architecture.md": "d904cb06c027521ac86a300ae3834e8d317bdfd8a11cd53fbd4cfdac27407bba",
+        "references/resource-management.md": "29ea2e753445c1d3e13476bf8e61e28dcfc803769f23309c3a67f6ca71e7383a",
+        "SKILL.md": "49bfe0170e71d2768f57415f0322b4e27149d03ea3d86b85ef346631668b0f51"
+      },
+      "installed_files": {
+        "agents/openai.yaml": "a1499d95abd8447558c535fe5554adcc3c9b988a0a39264a6283d430effe1e94",
+        "evals/evals.json": "7d2d8f0cfe749f3c4af88885c62ce27157c43576cc0550811b691c9fc23722b1",
+        "references/architecture.md": "c8a790ed9e180b52a412455bae24e7f0e68c6e605ba3acd90ab35cd16fb813eb",
+        "references/clean-architecture.md": "b4625aa00c641fb106bf5cdabab38f70146f746a4d244f68a71b2b8bd6c7d268",
+        "references/data-handling.md": "72d78bf015637c7da90c3e298c1df89b20149421006d3dfd03e5f910212c9ce5",
+        "references/ddd.md": "bcd8382c1369bf505cb8422f83b46bd05e11f4587b6a173ca7eaa1a1a55080e6",
+        "references/hexagonal-architecture.md": "d904cb06c027521ac86a300ae3834e8d317bdfd8a11cd53fbd4cfdac27407bba",
+        "references/resource-management.md": "29ea2e753445c1d3e13476bf8e61e28dcfc803769f23309c3a67f6ca71e7383a",
+        "SKILL.md": "6e60773084dce075d7d2aacac210034a2721ef3453d37f6f458388431cb1c66a"
+      }
+    },
+    "golang-pkg-go-dev": {
+      "group": "B",
+      "files": {
+        "references/sample-output.md": "a1ed7ecb40646bc197b3a57a9dbc9705b198f1dc2cc69ab5dcee9babf7cb8516",
+        "SKILL.md": "74d399d4662247d471dec02715bcfd8db644e3bc3157ed306c3f32e30a0a244e"
+      },
+      "installed_files": {
+        "agents/openai.yaml": "a1499d95abd8447558c535fe5554adcc3c9b988a0a39264a6283d430effe1e94",
+        "references/sample-output.md": "a1ed7ecb40646bc197b3a57a9dbc9705b198f1dc2cc69ab5dcee9babf7cb8516",
+        "SKILL.md": "8b00ff96e4f5a540dfaf82665f71737c05abe27408a5f775a1c33ad0ee7bfe72"
+      }
+    },
+    "golang-popular-libraries": {
+      "group": "B",
+      "files": {
+        "evals/evals.json": "9d417e2e9a55e5e8dbdead8ce2f0baaa70c2fa21d4837c0aa4e6588cafb60b99",
+        "references/libraries.md": "f823b24642f32930caa9fac15090f601d60895b5079271b2ffc17839a3f79e03",
+        "references/stdlib.md": "232c73ff6121bf628d6f72268d6dcdb4c6313ac66c002b68dd96f20007bcbcef",
+        "references/tools.md": "0260ab480e26b87811ce9115eccf1570433775e55dd83a160c41cdfb7144e3c4",
+        "SKILL.md": "b39895a329c1f0af944d93b513272f4e3190844b41d0075c9ac011bcf063ec31"
+      },
+      "installed_files": {
+        "agents/openai.yaml": "a1499d95abd8447558c535fe5554adcc3c9b988a0a39264a6283d430effe1e94",
+        "evals/evals.json": "9d417e2e9a55e5e8dbdead8ce2f0baaa70c2fa21d4837c0aa4e6588cafb60b99",
+        "references/libraries.md": "f823b24642f32930caa9fac15090f601d60895b5079271b2ffc17839a3f79e03",
+        "references/stdlib.md": "232c73ff6121bf628d6f72268d6dcdb4c6313ac66c002b68dd96f20007bcbcef",
+        "references/tools.md": "0260ab480e26b87811ce9115eccf1570433775e55dd83a160c41cdfb7144e3c4",
+        "SKILL.md": "5275b432f87ad10eeb26d3a914bea92f3fc9f399abfe4c88867cbdaaa5fcb3c3"
+      }
+    },
+    "golang-swagger": {
+      "group": "B",
+      "files": {
+        "evals/evals.json": "f50b02b6fc4d4525b955a290e26a7a936ada921b4ee6004d8287119f3886ba73",
+        "references/swag-cli.md": "85cb78c7378da39e88347c1c251aac9a67537cfa7100cf399d5b14a9cbfd0b60",
+        "SKILL.md": "537126ccf09bf25f4edae6e0fac2bbb7d4ffbd157edadf17e7a6d2e03d19a93e"
+      },
+      "installed_files": {
+        "agents/openai.yaml": "a1499d95abd8447558c535fe5554adcc3c9b988a0a39264a6283d430effe1e94",
+        "evals/evals.json": "f50b02b6fc4d4525b955a290e26a7a936ada921b4ee6004d8287119f3886ba73",
+        "references/swag-cli.md": "85cb78c7378da39e88347c1c251aac9a67537cfa7100cf399d5b14a9cbfd0b60",
+        "SKILL.md": "fa1983751c77eb7ab45f88364036145461114f02847006ab7be1c53c94d087d6"
+      }
+    },
+    "golang-dependency-injection": {
+      "group": "B",
+      "files": {
+        "evals/evals.json": "91fb15b20790e8acb509e9ef3947777aa6f48d2bbccc781889828f319d73a4c7",
+        "references/google-wire.md": "009c413c3de5b463b47d2035a4384abe24eccf9c66db934ec7572fbdb2de8068",
+        "references/manual-di.md": "c8a7fc68f2ef7709ab69bc4b58e5270ca9675f7d77d4d71234a9ab3a1bcbf623",
+        "references/samber-do.md": "c2002f85d37e76215a49ecf42b3eba6767eca914e98c289e8e7cc52c57c9842e",
+        "references/uber-dig-fx.md": "a3e2ed7b8ddf7346128e99f3f6c5c7fdf0e426a1e16282520646473fc6b99bbc",
+        "SKILL.md": "2c41da3950c03198fe8d5ea21ab024e8ea7ebd162925fe2b91024a750d63a1be"
+      },
+      "installed_files": {
+        "agents/openai.yaml": "a1499d95abd8447558c535fe5554adcc3c9b988a0a39264a6283d430effe1e94",
+        "evals/evals.json": "91fb15b20790e8acb509e9ef3947777aa6f48d2bbccc781889828f319d73a4c7",
+        "references/google-wire.md": "009c413c3de5b463b47d2035a4384abe24eccf9c66db934ec7572fbdb2de8068",
+        "references/manual-di.md": "c8a7fc68f2ef7709ab69bc4b58e5270ca9675f7d77d4d71234a9ab3a1bcbf623",
+        "references/samber-do.md": "c2002f85d37e76215a49ecf42b3eba6767eca914e98c289e8e7cc52c57c9842e",
+        "references/uber-dig-fx.md": "a3e2ed7b8ddf7346128e99f3f6c5c7fdf0e426a1e16282520646473fc6b99bbc",
+        "SKILL.md": "3f83659a4ff4dfbc08456a971edf3f56fa1feec7ffb7a339b63bccdf221a1321"
+      }
+    },
+    "golang-cli": {
+      "group": "B",
+      "files": {
+        "assets/examples/args.go": "024d75e8fcb55ce84930b2e07b7f464d8f9eb2b55f47eb0cd6b1abb6e9bb3ae9",
+        "assets/examples/cli_test.go": "0086d4f0f075744519d2366c87fc90e5a7c1739b6bfa5b5dc430d5f79bfd6226",
+        "assets/examples/completion.go": "3e91ac78c36d706bb6db5b6395f62f08c5176460de1d52870a11b5753fda3b1e",
+        "assets/examples/config.go": "24f6c7653b90b141c8f1dec2be9c4b22198fd3d66de9cd2d64dc73ddf40954a4",
+        "assets/examples/exit_codes.go": "27d02ca34c939fe7c7c1f663c9a6bddfb6c3dd5eabc68890f72ff32e2a085965",
+        "assets/examples/flags.go": "d8a7164364e6a4d69c5eb57fe866d6793f41d8b8c6f09d2e2df1b2140083e038",
+        "assets/examples/main.go": "f529e3cfddb3915dffb882bc0f7f63cd5e0cc60a18cb4c8b92359b5f069a4dd1",
+        "assets/examples/output.go": "1520680bb6fe50cc3f95bd8b6237fa53a4bba5ef334e46424d1aaecd2f5bdb30",
+        "assets/examples/root.go": "fe6429593d1a91c9c0d729719e9a0eda4cb661815cccd713c7c5918e7abafe47",
+        "assets/examples/serve.go": "0b8c5253a1cd6e6c14875d640c2f7aadb9c3ad1b9cb213ff5d6845f595ad07aa",
+        "assets/examples/signal.go": "620e92cdf1a0c21f6fbd6a5d2786bc599d8b957a47ae68ba25af81f5f3f693c0",
+        "assets/examples/version.go": "660668240b0eebb5f7f506f2446ea357b6bfdf15f3842d7c7aa0b1db4b83fda6",
+        "evals/evals.json": "b2a08339a212d386e4743db83335030f98c13c73fd1dd201544d78918d662acf",
+        "SKILL.md": "da9eef3871a94cccbcbab77c2b3a5990e7fe00d9434f3728cb427e520ae77311"
+      },
+      "installed_files": {
+        "agents/openai.yaml": "a1499d95abd8447558c535fe5554adcc3c9b988a0a39264a6283d430effe1e94",
+        "assets/examples/args.go": "024d75e8fcb55ce84930b2e07b7f464d8f9eb2b55f47eb0cd6b1abb6e9bb3ae9",
+        "assets/examples/cli_test.go": "0086d4f0f075744519d2366c87fc90e5a7c1739b6bfa5b5dc430d5f79bfd6226",
+        "assets/examples/completion.go": "3e91ac78c36d706bb6db5b6395f62f08c5176460de1d52870a11b5753fda3b1e",
+        "assets/examples/config.go": "24f6c7653b90b141c8f1dec2be9c4b22198fd3d66de9cd2d64dc73ddf40954a4",
+        "assets/examples/exit_codes.go": "27d02ca34c939fe7c7c1f663c9a6bddfb6c3dd5eabc68890f72ff32e2a085965",
+        "assets/examples/flags.go": "d8a7164364e6a4d69c5eb57fe866d6793f41d8b8c6f09d2e2df1b2140083e038",
+        "assets/examples/main.go": "f529e3cfddb3915dffb882bc0f7f63cd5e0cc60a18cb4c8b92359b5f069a4dd1",
+        "assets/examples/output.go": "1520680bb6fe50cc3f95bd8b6237fa53a4bba5ef334e46424d1aaecd2f5bdb30",
+        "assets/examples/root.go": "fe6429593d1a91c9c0d729719e9a0eda4cb661815cccd713c7c5918e7abafe47",
+        "assets/examples/serve.go": "0b8c5253a1cd6e6c14875d640c2f7aadb9c3ad1b9cb213ff5d6845f595ad07aa",
+        "assets/examples/signal.go": "620e92cdf1a0c21f6fbd6a5d2786bc599d8b957a47ae68ba25af81f5f3f693c0",
+        "assets/examples/version.go": "660668240b0eebb5f7f506f2446ea357b6bfdf15f3842d7c7aa0b1db4b83fda6",
+        "evals/evals.json": "b2a08339a212d386e4743db83335030f98c13c73fd1dd201544d78918d662acf",
+        "SKILL.md": "a3912cabf2391df417907af3fef56f25f13c810d96c29080a4139a3ae8f305d8"
+      }
+    },
+    "golang-graphql": {
+      "group": "B",
+      "files": {
+        "evals/evals.json": "965bd5c7d32338e249442254c21290e463e23d727b706e15d8101df6c8937843",
+        "references/gqlgen.md": "2ad4ebb630261d8f1ca3963ba86006e2ab0a4ccbf9ebff4869c03c01512eaf9c",
+        "references/graphql-go.md": "83f1c9bc4cb9ae606583fee9f0f647079ef8280889ec93655ce44113efa70b8e",
+        "references/testing.md": "ff26ecd462bc042ae09519ff12e9828802c4b09ad0f0cb023c1452eea653282b",
+        "SKILL.md": "98c62367ab8bd4e5b58d0765f8cf26133198e11715c5b938b4e810a1b03e3867"
+      },
+      "installed_files": {
+        "agents/openai.yaml": "a1499d95abd8447558c535fe5554adcc3c9b988a0a39264a6283d430effe1e94",
+        "evals/evals.json": "965bd5c7d32338e249442254c21290e463e23d727b706e15d8101df6c8937843",
+        "references/gqlgen.md": "2ad4ebb630261d8f1ca3963ba86006e2ab0a4ccbf9ebff4869c03c01512eaf9c",
+        "references/graphql-go.md": "83f1c9bc4cb9ae606583fee9f0f647079ef8280889ec93655ce44113efa70b8e",
+        "references/testing.md": "ff26ecd462bc042ae09519ff12e9828802c4b09ad0f0cb023c1452eea653282b",
+        "SKILL.md": "b8c7f79d568af804ad17954f6f682c87e419de3d13123d3893ec09b8147a5986"
+      }
+    },
+    "golang-samber-hot": {
+      "group": "B",
+      "files": {
+        "evals/evals.json": "9835adf20c32939d5a58d2384e3e5a0578e3ae458927c9396b81664528d09d84",
+        "references/algorithm-guide.md": "6028b460a289f09a2fa29fb448e7d73f95ce898d8719e7309c4cd20979a4c920",
+        "references/api-reference.md": "1dcd2b4c4cac2b538fb04119e3c7a54ed315bc9e44fa4551c7b8cda0533681ae",
+        "references/production-patterns.md": "d0e2e2cf5bcbf27d9cfe49325f2ae6292f875e3ffd21a74d9cdf269de3ed2af3",
+        "SKILL.md": "96f8bdb1affbc84e1701608bc54cb8ac76e3432c089d2b9d3a7fe63fa187f916"
+      },
+      "installed_files": {
+        "agents/openai.yaml": "a1499d95abd8447558c535fe5554adcc3c9b988a0a39264a6283d430effe1e94",
+        "evals/evals.json": "9835adf20c32939d5a58d2384e3e5a0578e3ae458927c9396b81664528d09d84",
+        "references/algorithm-guide.md": "6028b460a289f09a2fa29fb448e7d73f95ce898d8719e7309c4cd20979a4c920",
+        "references/api-reference.md": "1dcd2b4c4cac2b538fb04119e3c7a54ed315bc9e44fa4551c7b8cda0533681ae",
+        "references/production-patterns.md": "d0e2e2cf5bcbf27d9cfe49325f2ae6292f875e3ffd21a74d9cdf269de3ed2af3",
+        "SKILL.md": "5e22c95018fce3257b945cf9821f6257d86359996a5630c0e0d7d1b81b4521ec"
+      }
+    }
+  }
+}

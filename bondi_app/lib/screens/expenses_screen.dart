@@ -1,6 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+
+import '../theme/app_theme.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ExpensesScreen extends StatefulWidget {
@@ -27,12 +30,13 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
           .map((e) => Map<String, dynamic>.from(e))
           .toList();
     } catch (_) {}
-    if (mounted)
+    if (mounted) {
       setState(() {
         entries = saved;
         fare = prefs.getString('expense_fare_v1') ?? '';
         loading = false;
       });
+    }
   }
 
   String money(int cents) =>
@@ -99,8 +103,9 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                       firstDate: DateTime(2020),
                       lastDate: DateTime.now(),
                     );
-                    if (picked != null && ctx.mounted)
+                    if (picked != null && ctx.mounted) {
                       update(() => date = picked);
+                    }
                   },
                 ),
               ],
@@ -193,7 +198,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEAF2FF),
+                    color: pale,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Column(
@@ -229,7 +234,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                       e['free'] == true
                           ? Icons.card_membership
                           : Icons.payments_outlined,
-                      color: const Color(0xFF006CA8),
+                      color: blue,
                     ),
                     title: Text(
                       e['note'].toString().isEmpty
@@ -263,12 +268,13 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                                 ],
                               ),
                             );
-                            if (confirmed == true && mounted)
+                            if (confirmed == true && mounted) {
                               await save(
                                 entries
                                     .where((item) => !identical(item, e))
                                     .toList(),
                               );
+                            }
                           },
                         ),
                       ],

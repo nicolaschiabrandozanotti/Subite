@@ -6,7 +6,7 @@ import '../models/models.dart';
 import 'journey_planner.dart';
 
 class PredictiveEngine {
-  // Average urban bus speed in Córdoba: ~18 km/h ≈ 5.0 m/s
+  // Fixed approximation, not a measured speed: 18 km/h = 5 m/s.
   static const double urbanSpeedMetersPerSec = 5.0;
   static final Distance distanceCalc = const Distance();
 
@@ -24,8 +24,7 @@ class PredictiveEngine {
     );
     final elapsedMinutes = (elapsedSeconds / 60).floor();
 
-    // Cached data is never labeled live. After 10 minutes keep the original
-    // position instead of extending a fixed-speed guess indefinitely.
+    // Stop at the route end; never invent another lap or reset old positions.
 
     final polyline = traza?.puntos ?? [];
     final distanceToAdvance = elapsedSeconds * urbanSpeedMetersPerSec;
@@ -37,45 +36,13 @@ class PredictiveEngine {
               JourneyPlanner.progress(bus.position, polyline) != null,
         )
         .map((bus) {
-          if (elapsedSeconds >= 600 ||
-              polyline.length < 2 ||
-              elapsedSeconds < 15) {
-            return Coche(
-              coche: bus.coche,
-              linea: bus.linea,
-              sentido: bus.sentido,
-              lat: bus.lat,
-              lon: bus.lon,
-              curso: bus.curso,
-              demora:
-                  'Última posición · hace $elapsedMinutes min · sin avance estimado',
-              rampa: bus.rampa,
-              ultimaActualizacion: bus.ultimaActualizacion,
-              isPredictive: true,
-            );
-          }
+          // Advance from the projected position, not the nearest route vertex.
+          double remaining =
+              JourneyPlanner.progress(bus.position, polyline)! +
+              distanceToAdvance;
+          int currentIdx = 0;
 
-          // Find closest point on route
-          int closestIdx = 0;
-          double minDistance = double.infinity;
-
-          for (int i = 0; i < polyline.length; i++) {
-            final d = distanceCalc.as(
-              LengthUnit.Meter,
-              LatLng(bus.lat, bus.lon),
-              polyline[i],
-            );
-            if (d < minDistance) {
-              minDistance = d;
-              closestIdx = i;
-            }
-          }
-
-          // Advance along polyline
-          double remaining = distanceToAdvance;
-          int currentIdx = closestIdx;
-
-          while (remaining > 0 && currentIdx < polyline.length - 1) {
+          while (currentIdx < polyline.length - 1) {
             final p1 = polyline[currentIdx];
             final p2 = polyline[currentIdx + 1];
             final segDist = distanceCalc.as(LengthUnit.Meter, p1, p2);

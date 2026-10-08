@@ -2,6 +2,11 @@ import 'package:latlong2/latlong.dart';
 
 import '../models/models.dart';
 
+bool arrivalMatchesRoute(Map<String, dynamic> item, Linea line, Ruta route) =>
+    '${item['linea']}' == line.id &&
+    '${item['ruta']}' == route.id &&
+    '${item['cliente']}' == '${line.clienteId}';
+
 /// Stop-arrival `a` is [stop latitude, stop longitude, vehicle latitude,
 /// vehicle longitude], verified against the official vehicle GPS response.
 List<Coche> arrivalPositions(
@@ -13,10 +18,9 @@ List<Coche> arrivalPositions(
   final seen = <int>{};
   final buses = <Coche>[];
   for (final item in arrivals) {
-    if ('${item['linea']}' != line.id ||
-        '${item['ruta']}' != route.id ||
-        '${item['cliente']}' != '${line.clienteId}')
+    if (!arrivalMatchesRoute(item, line, route)) {
       continue;
+    }
     final id = int.tryParse('${item['coche']}');
     final a = item['a'];
     if (id == null || id <= 0 || a is! List || a.length != 4) continue;
@@ -25,8 +29,9 @@ List<Coche> arrivalPositions(
     final lat = coords[2]!, lon = coords[3]!;
     if (lat.abs() > 90 || lon.abs() > 180 || lat == 0 || lon == 0) continue;
     if (coords[0]!.abs() > 90 || coords[1]!.abs() > 180) continue;
-    if (const Distance()(stop.position, LatLng(coords[0]!, coords[1]!)) > 30)
+    if (const Distance()(stop.position, LatLng(coords[0]!, coords[1]!)) > 30) {
       continue;
+    }
     if (!seen.add(id)) continue;
     buses.add(
       Coche(

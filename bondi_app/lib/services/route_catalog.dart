@@ -11,7 +11,7 @@ Future<RouteCatalogResult> loadRouteCatalog(
   List<Linea> lines,
   Future<Traza?> Function(Linea, Ruta) fetch, {
   required bool Function() keepGoing,
-  required void Function(int, int) onProgress,
+  void Function(int, int)? onProgress,
   Duration budget = const Duration(seconds: 45),
 }) async {
   final jobs = [
@@ -36,7 +36,7 @@ Future<RouteCatalogResult> loadRouteCatalog(
       } catch (_) {}
       if (!keepGoing()) return;
       if (trace != null) result.add((job.$1, job.$2, trace));
-      onProgress(++complete, jobs.length);
+      onProgress?.call(++complete, jobs.length);
     }
   }
 

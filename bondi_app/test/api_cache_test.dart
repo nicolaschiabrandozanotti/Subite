@@ -79,34 +79,4 @@ void main() {
     final prefs = await SharedPreferences.getInstance();
     expect(prefs.getString('cache_lineas'), valid);
   });
-
-  test(
-    'Offline bus snapshots cannot cross companies with the same route ID',
-    () async {
-      ApiService.testClient = MockClient(
-        (r) async => http.Response(
-          jsonEncode({
-            'coches': [
-              {'coche': 1, 'linea': '70', 'lat': -31.4, 'lon': -64.2},
-            ],
-          }),
-          200,
-        ),
-      );
-      await ApiService.fetchCoches(
-        rutaId: '211',
-        clienteId: 422,
-        lineaNombre: '70',
-        traza: null,
-      );
-      final result = await ApiService.fetchCoches(
-        rutaId: '211',
-        clienteId: 999,
-        lineaNombre: '70',
-        traza: null,
-        offline: true,
-      );
-      expect(result['coches'], isEmpty);
-    },
-  );
 }

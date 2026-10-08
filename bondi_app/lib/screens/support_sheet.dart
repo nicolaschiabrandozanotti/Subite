@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../theme/app_theme.dart';
+
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -53,11 +56,7 @@ class SupportSheet extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(
-            Icons.favorite_outline,
-            color: Color(0xFF006CA8),
-            size: 32,
-          ),
+          const Icon(Icons.favorite_outline, color: blue, size: 32),
           const SizedBox(height: 12),
           const Text(
             'Bancá Subite',
@@ -72,7 +71,7 @@ class SupportSheet extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              color: const Color(0xFFEAF2FF),
+              color: pale,
               borderRadius: BorderRadius.circular(18),
             ),
             child: Column(

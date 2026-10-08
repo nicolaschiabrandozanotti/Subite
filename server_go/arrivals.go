@@ -23,6 +23,9 @@ type arrivalFlight struct {
 var errArrivalsBusy = errors.New("arrivals busy")
 
 func (s *BondiServer) arrivals(ctx context.Context, code string) ([]byte, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	s.arrivalsMu.Lock()
 	if entry, ok := s.arrivalsCache[code]; ok && time.Now().Before(entry.expires) {
 		s.arrivalsMu.Unlock()
@@ -34,6 +37,10 @@ func (s *BondiServer) arrivals(ctx context.Context, code string) ([]byte, error)
 		case <-ctx.Done():
 			return nil, ctx.Err()
 		case <-flight.done:
+			// A cancelled leader must not cancel a still-connected waiter.
+			if (errors.Is(flight.err, context.Canceled) || errors.Is(flight.err, context.DeadlineExceeded)) && ctx.Err() == nil {
+				return s.arrivals(ctx, code)
+			}
 			return flight.data, flight.err
 		}
 	}
@@ -46,7 +53,7 @@ func (s *BondiServer) arrivals(ctx context.Context, code string) ([]byte, error)
 	flight := &arrivalFlight{done: make(chan struct{})}
 	s.arrivalsFlights[code] = flight
 	s.arrivalsMu.Unlock()
-	raw, err := s.makeRequest("cmd=proximos_arribos", url.Values{
+	raw, err := s.makeRequest(ctx, "cmd=proximos_arribos", url.Values{
 		"codigo": {code}, "conf": {"cbaciudad"}, "onlygps": {"true"}, "show80min": {"false"},
 	}, false)
 	var payload struct {

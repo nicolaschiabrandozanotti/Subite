@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:bondi_app/services/route_catalog.dart';
 import 'package:bondi_app/models/models.dart';
@@ -55,14 +56,19 @@ void main() {
         return null;
       },
       keepGoing: () => keep,
-      onProgress: (_, __) {},
+      onProgress: (_, _) {},
     );
     expect(calls, 1);
   });
   test('Deadline finishes even if a provider never answers', () async {
-    final result = await loadRouteCatalog([line], (_,__) => Completer<Traza?>().future,
-      keepGoing: () => true, onProgress: (_,__) {}, budget: const Duration(milliseconds: 20));
-    expect(result.routes,isEmpty);
-    expect(result.unavailable,9);
-  });}
-
+    final result = await loadRouteCatalog(
+      [line],
+      (_, _) => Completer<Traza?>().future,
+      keepGoing: () => true,
+      onProgress: (_, _) {},
+      budget: const Duration(milliseconds: 20),
+    );
+    expect(result.routes, isEmpty);
+    expect(result.unavailable, 9);
+  });
+}
