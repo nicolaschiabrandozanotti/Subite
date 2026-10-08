@@ -43,7 +43,9 @@ void main() {
   testWidgets(
     'Local raster map displays packaged PNGs without network or street geometry',
     (tester) async {
-      final loaded = await tester.runAsync(() => RasterMap.load());
+      final loaded = await tester.runAsync(
+        () => RasterMap.load(directory: Directory("assets/maps")),
+      );
       expect(loaded, isNotNull);
       final controller = MapController();
       await tester.pumpWidget(

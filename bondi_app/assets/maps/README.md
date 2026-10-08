@@ -20,6 +20,11 @@ Las imágenes son de 512 px para cuadros de mapa de 256 px, zoom nativo 10–16.
 A mayor zoom se amplían las imágenes existentes; no se agregan detalles.
 La cobertura es la del dataset anterior; fuera de ella no hay mapa local.
 
-El mapa se incluye en esta APK de prueba y se usa conectado y sin datos con
-el mismo estilo. La descarga separada por Wi-Fi todavía no está implementada.
+El mapa se descarga manualmente con Wi-Fi y se guarda en el directorio privado
+de soporte de la app. No se empaqueta como asset en la APK. Se usa conectado
+y sin datos con el mismo estilo. Actualizar mapa consulta el indice publicado
+en feat/support-subite, por HTTPS. Solo se activa una generacion despues de
+validar tamano, indice y SHA-256; una descarga fallida conserva el mapa anterior.
+Las descargas interrumpidas se reintentan desde el principio. Desinstalar la app
+elimina el mapa descargado; actualizar la APK lo conserva.
 Se conserva el dataset fuente para regenerarlo; la app ya no dibuja sus calles.

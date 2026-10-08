@@ -1,7 +1,11 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+import 'map_package.dart';
+
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -20,28 +24,23 @@ class RasterMap extends TileProvider {
   final int minZoom, maxZoom;
   final Map<String, MemoryImage> _images = {};
   static Future<RasterMap>? _loaded;
-  static Future<RasterMap> load() => _loaded ??= _load();
-  static Future<RasterMap> _load() async {
-    final manifest = jsonDecode(
-      await rootBundle.loadString('assets/maps/cordoba.tiles.json'),
-    ) as Map<String, dynamic>;
-    if (manifest['version'] != 1) {
-      throw const FormatException('Unsupported raster map');
-    }
-    final data = await rootBundle.load('assets/maps/cordoba.tiles');
-    final bytes = data.buffer.asUint8List(
-      data.offsetInBytes,
-      data.lengthInBytes,
-    );
+  static void invalidate() => _loaded = null;
+  static Future<RasterMap> load({Directory? directory}) =>
+      _loaded ??= _load(directory);
+  static Future<RasterMap> _load(Directory? directory) async {
+    final files = directory == null
+        ? await MapPackage.instance.currentFiles()
+        : (
+            File('${directory.path}/cordoba.tiles.json'),
+            File('${directory.path}/cordoba.tiles'),
+          );
+    if (files == null) throw StateError('Mapa pendiente de descarga');
+    final manifest =
+        jsonDecode(await files.$1.readAsString()) as Map<String, dynamic>;
+    final bytes = await files.$2.readAsBytes();
+    validateMapIndex(manifest, bytes.length);
     final bounds = manifest['bounds'] as List;
     final index = manifest['tiles'] as Map<String, dynamic>;
-    for (final entry in index.values) {
-      final range = entry as List;
-      final offset = range[0] as int, length = range[1] as int;
-      if (offset < 0 || length < 8 || offset + length > bytes.length) {
-        throw const FormatException('Invalid raster tile range');
-      }
-    }
     return RasterMap._(
       bytes,
       index,

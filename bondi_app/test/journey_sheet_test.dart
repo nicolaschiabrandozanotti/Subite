@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import 'dart:convert';
@@ -15,7 +17,9 @@ void main() {
   testWidgets('Offline trip renders its saved bus over packaged map tiles', (
     tester,
   ) async {
-    await tester.runAsync(RasterMap.load);
+    await tester.runAsync(
+      () => RasterMap.load(directory: Directory("assets/maps")),
+    );
     final point = {'codigo': 'a', 'nombre': 'Casa', 'lat': -31.4, 'lon': -64.2};
     final end = {
       'codigo': 'b',

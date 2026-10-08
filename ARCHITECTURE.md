@@ -76,5 +76,11 @@ La resolución de llamadas es parcial. Una relación ausente no prueba que el c�
 `tool/render_offline_map.py` genera las imágenes a partir del dataset OSM local.
 `services/raster_map.dart` lee su índice y entrega imágenes a FlutterMap.
 `widgets/offline_map_layer.dart` presenta esa capa tanto conectado como sin datos.
-El recorrido y los colectivos se dibujan encima. El paquete se incluye en la APK;
-la descarga/actualización separada todavía queda pendiente. Zoom nativo 10–16.
+El recorrido y los colectivos se dibujan encima. Zoom nativo 10-16.
+`services/map_package.dart` descarga por HTTPS, informa progreso y valida el
+indice y SHA-256 antes de cambiar la referencia activa. Los archivos viven en
+application support y sobreviven a actualizaciones de la APK. La capa exige
+Wi-Fi antes de descargar mediante el canal Android bondi/device. El mapa ya no
+se incluye en la APK; el generador y su fuente quedan en el repositorio.
+Actualizar mapa vuelve a consultar el indice publicado; si el checksum no cambia
+no descarga otra vez las imagenes. Un fallo conserva la generacion anterior.

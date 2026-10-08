@@ -19,7 +19,12 @@ class MainActivity : FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "bondi/device").setMethodCallHandler { call, result ->
-            if (call.method == "lightMode") {
+            if (call.method == "wifi") {
+                val connectivity = getSystemService(android.net.ConnectivityManager::class.java)
+                val network = connectivity.activeNetwork
+                val capabilities = connectivity.getNetworkCapabilities(network)
+                result.success(capabilities?.hasTransport(android.net.NetworkCapabilities.TRANSPORT_WIFI) == true)
+            } else if (call.method == "lightMode") {
                 val manager = getSystemService(ActivityManager::class.java)
                 val memory = ActivityManager.MemoryInfo()
                 manager.getMemoryInfo(memory)
