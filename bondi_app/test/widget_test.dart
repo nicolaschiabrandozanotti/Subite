@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:bondi_app/services/raster_map.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -12,11 +15,24 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     SharedPreferences.setMockInitialValues({});
+    await tester.runAsync(
+      () => RasterMap.load(directory: Directory("assets/maps")),
+    );
     await tester.pumpWidget(const BondiApp());
+    await tester.runAsync(() async {
+      await Future<void>.delayed(Duration.zero);
+    });
     await tester.pump(const Duration(milliseconds: 100));
     expect(find.byType(AppBar), findsNothing);
     expect(find.text('INICIO'), findsOneWidget);
     expect(find.text('DESTINO'), findsOneWidget);
+    await tester.tap(find.byTooltip('Bancá Subite'));
+    await tester.pumpAndSettle();
+    expect(find.text('nicochiabrando'), findsOneWidget);
+    expect(find.text('0000003100012189129203'), findsOneWidget);
+    expect(find.text('Nicolás Chiabrando Zanotti'), findsOneWidget);
+    Navigator.of(tester.element(find.text('Bancá Subite'))).pop();
+    await tester.pumpAndSettle();
     await tester.tap(find.text('¿Desde dónde salís?'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
@@ -50,7 +66,13 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     SharedPreferences.setMockInitialValues({});
+    await tester.runAsync(
+      () => RasterMap.load(directory: Directory("assets/maps")),
+    );
     await tester.pumpWidget(const BondiApp());
+    await tester.runAsync(() async {
+      await Future<void>.delayed(Duration.zero);
+    });
     await tester.pump(const Duration(milliseconds: 100));
     await tester.tap(find.text('Guardados'));
     await tester.pump();
@@ -80,6 +102,9 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
       SharedPreferences.setMockInitialValues({});
+      await tester.runAsync(
+        () => RasterMap.load(directory: Directory("assets/maps")),
+      );
       await tester.pumpWidget(const BondiApp());
       await tester.pump(const Duration(milliseconds: 100));
       await tester.tap(find.text('Alertas'));

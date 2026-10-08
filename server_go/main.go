@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"hash/fnv"
@@ -51,10 +52,13 @@ func NewBondiServer() *BondiServer {
 }
 
 // Ensure active session with micronauta backend
-func (s *BondiServer) ensureSession() (string, error) {
+func (s *BondiServer) ensureSession(ctx context.Context) (string, error) {
 	s.sessionLoad.Lock()
 	defer s.sessionLoad.Unlock()
 
+	if err := ctx.Err(); err != nil {
+		return "", err
+	}
 	now := time.Now()
 	s.mu.RLock()
 	if s.cookie != "" && now.Before(s.cookieExpiry) {
@@ -65,7 +69,7 @@ func (s *BondiServer) ensureSession() (string, error) {
 	s.mu.RUnlock()
 
 	log.Println("🔄 [Go Server] Inicializando nueva sesión con el servidor municipal...")
-	req, err := http.NewRequest("GET", baseURL+"/usuario/urbano.php?conf=cbaciudad", nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", baseURL+"/usuario/urbano.php?conf=cbaciudad", nil)
 	if err != nil {
 		return "", err
 	}
@@ -96,18 +100,21 @@ func (s *BondiServer) ensureSession() (string, error) {
 }
 
 // Request to TuBondi backend with auto-retry on 408
-func (s *BondiServer) makeRequest(endpoint string, bodyParams url.Values, isGet bool) ([]byte, error) {
+func (s *BondiServer) makeRequest(ctx context.Context, endpoint string, bodyParams url.Values, isGet bool) ([]byte, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	select {
 	case s.upstreamSlots <- struct{}{}:
 	default:
 		return nil, errArrivalsBusy
 	}
 	defer func() { <-s.upstreamSlots }()
-	return s.makeRequestAttempt(endpoint, bodyParams, isGet, true)
+	return s.makeRequestAttempt(ctx, endpoint, bodyParams, isGet, true)
 }
 
-func (s *BondiServer) makeRequestAttempt(endpoint string, bodyParams url.Values, isGet, retry bool) ([]byte, error) {
-	cookie, err := s.ensureSession()
+func (s *BondiServer) makeRequestAttempt(ctx context.Context, endpoint string, bodyParams url.Values, isGet, retry bool) ([]byte, error) {
+	cookie, err := s.ensureSession(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -116,10 +123,10 @@ func (s *BondiServer) makeRequestAttempt(endpoint string, bodyParams url.Values,
 	var req *http.Request
 
 	if isGet || bodyParams == nil {
-		req, err = http.NewRequest("GET", reqURL, nil)
+		req, err = http.NewRequestWithContext(ctx, "GET", reqURL, nil)
 	} else {
 
-		req, err = http.NewRequest("POST", reqURL, strings.NewReader(bodyParams.Encode()))
+		req, err = http.NewRequestWithContext(ctx, "POST", reqURL, strings.NewReader(bodyParams.Encode()))
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	}
 	if err != nil {
@@ -148,7 +155,7 @@ func (s *BondiServer) makeRequestAttempt(endpoint string, bodyParams url.Values,
 		}
 		s.mu.Unlock()
 		resp.Body.Close()
-		return s.makeRequestAttempt(endpoint, bodyParams, isGet, false)
+		return s.makeRequestAttempt(ctx, endpoint, bodyParams, isGet, false)
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return nil, fmt.Errorf("upstream status %d", resp.StatusCode)
@@ -196,7 +203,7 @@ func (s *BondiServer) handleLineas(w http.ResponseWriter, r *http.Request) {
 
 	params := url.Values{}
 	params.Set("conf", "cbaciudad")
-	raw, err := s.makeRequest("cmd=lineasyrutas", params, false)
+	raw, err := s.makeRequest(r.Context(), "cmd=lineasyrutas", params, false)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -318,7 +325,7 @@ func (s *BondiServer) handleCoches(w http.ResponseWriter, r *http.Request) {
 	params.Set("parada_seleccionada", "0")
 	params.Set("conf", "cbaciudad")
 
-	raw, err := s.makeRequest("cmd=consultacocheporruta", params, false)
+	raw, err := s.makeRequest(r.Context(), "cmd=consultacocheporruta", params, false)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -413,7 +420,7 @@ func (s *BondiServer) handleTraza(w http.ResponseWriter, r *http.Request) {
 	}
 	s.mu.RUnlock()
 
-	raw, err := s.makeRequest("cmd=seleccionatraza", url.Values{
+	raw, err := s.makeRequest(r.Context(), "cmd=seleccionatraza", url.Values{
 		"ruta": {ruta}, "cliente_id": {cliente}, "conf": {"cbaciudad"},
 	}, false)
 	if err != nil {

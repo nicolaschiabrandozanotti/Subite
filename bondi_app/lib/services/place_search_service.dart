@@ -77,8 +77,9 @@ class PlaceSearchService {
         !matches(
           'UTN FRC Facultad Regional Córdoba Universidad Tecnológica Nacional',
           query,
-        ))
+        )) {
       return [];
+    }
     return [
       PlaceSuggestion(
         Parada(
@@ -94,8 +95,9 @@ class PlaceSearchService {
 
   static Future<List<PlaceSuggestion>> search(String query) async {
     if (localSuggestions(query)
-        .any((p) => p.point.codigo.startsWith('poi_faud_')))
+        .any((p) => p.point.codigo.startsWith('poi_faud_'))) {
       return [];
+    }
     final uri = Uri.parse('${ApiService.baseUrl}/places')
         .replace(queryParameters: {'q': query.trim()});
     final response = await http.get(uri).timeout(const Duration(seconds: 14));
