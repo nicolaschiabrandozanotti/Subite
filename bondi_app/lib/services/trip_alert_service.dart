@@ -45,6 +45,7 @@ class TripAlertService extends ChangeNotifier {
   Parada? target;
   double radius = 300;
   double? distance;
+  Position? lastPosition;
   bool active = false;
   bool fired = false;
   bool systemNotifications = false;
@@ -102,6 +103,7 @@ class TripAlertService extends ChangeNotifier {
           .listen(
             (position) async {
               if (_disposed || version != _generation || !active) return;
+              lastPosition = position;
               distance = const Distance()(
                 LatLng(position.latitude, position.longitude),
                 stop.position,

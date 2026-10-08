@@ -17,6 +17,13 @@ void main() {
     expect(find.byType(AppBar), findsNothing);
     expect(find.text('INICIO'), findsOneWidget);
     expect(find.text('DESTINO'), findsOneWidget);
+    await tester.tap(find.byTooltip('Bancá Subite'));
+    await tester.pumpAndSettle();
+    expect(find.text('nicochiabrando'), findsOneWidget);
+    expect(find.text('0000003100012189129203'), findsOneWidget);
+    expect(find.text('Nicolás Chiabrando Zanotti'), findsOneWidget);
+    Navigator.of(tester.element(find.text('Bancá Subite'))).pop();
+    await tester.pumpAndSettle();
     await tester.tap(find.text('¿Desde dónde salís?'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
