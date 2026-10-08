@@ -17,7 +17,46 @@ class MapFeature {
 class OfflineBasemap {
   final List<MapFeature> features;
   final String dataDate;
-  OfflineBasemap(this.features, this.dataDate);
+  final Map<(int, int), List<int>> _cells = {};
+  static const _cellSize = .01;
+  OfflineBasemap(this.features, this.dataDate) {
+    for (var i = 0; i < features.length; i++) {
+      final bounds = features[i].bounds;
+      for (
+        var y = (bounds.south / _cellSize).floor();
+        y <= (bounds.north / _cellSize).floor();
+        y++
+      ) {
+        for (
+          var x = (bounds.west / _cellSize).floor();
+          x <= (bounds.east / _cellSize).floor();
+          x++
+        ) {
+          (_cells[(y, x)] ??= []).add(i);
+        }
+      }
+    }
+  }
+
+  Iterable<MapFeature> visibleFeatures(LatLngBounds bounds) sync* {
+    final candidates = <int>{};
+    // Iterate populated cells so zooming out cannot enumerate an unbounded grid.
+    final south = (bounds.south / _cellSize).floor();
+    final north = (bounds.north / _cellSize).floor();
+    final west = (bounds.west / _cellSize).floor();
+    final east = (bounds.east / _cellSize).floor();
+    for (final entry in _cells.entries) {
+      final (y, x) = entry.key;
+      if (y >= south && y <= north && x >= west && x <= east) {
+        candidates.addAll(entry.value);
+      }
+    }
+    final ordered = candidates.toList()..sort();
+    for (final index in ordered) {
+      final feature = features[index];
+      if (feature.bounds.isOverlapping(bounds)) yield feature;
+    }
+  }
 
   static Future<OfflineBasemap>? _loaded;
   static Future<OfflineBasemap> load() => _loaded ??= _load();

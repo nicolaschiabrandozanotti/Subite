@@ -43,8 +43,9 @@ class _OfflineMapLayerState extends State<OfflineMapLayer> {
         final labels = <Marker>[];
         final names = <String>{};
         final cells = <String>{};
-        for (final feature in snapshot.data!.features) {
-          if (!feature.bounds.isOverlapping(camera.visibleBounds)) continue;
+        for (final feature in snapshot.data!.visibleFeatures(
+          camera.visibleBounds,
+        )) {
           final major = _major.contains(feature.kind);
           if (camera.zoom < 13 &&
               !major &&

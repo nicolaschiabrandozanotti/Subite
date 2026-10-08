@@ -131,7 +131,7 @@ class _JourneyMapState extends State<JourneyMap> {
       onTap: (_, point) => widget.onPointPicked(point),
     ),
     children: [
-      const OfflineMapLayer(),
+      if (widget.journey.offline) const OfflineMapLayer(),
       if (!widget.journey.offline)
         TileLayer(
           urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
