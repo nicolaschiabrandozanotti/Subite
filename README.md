@@ -12,6 +12,7 @@
   <p>
     <a href="#qué-podés-hacer"><img alt="Descubrir Subite" src="https://img.shields.io/badge/Explorar_Subite-006CA8?style=for-the-badge&logo=googlemaps&logoColor=white" /></a>
     <a href="https://github.com/nicolaschiabrandozanotti/Subite/issues/new"><img alt="Proponer una idea" src="https://img.shields.io/badge/Proponer_una_idea-142B47?style=for-the-badge&logo=github&logoColor=white" /></a>
+    <a href="#bancá-subite"><img alt="Bancá Subite" src="https://img.shields.io/badge/Bancá_Subite-009EE3?style=for-the-badge&logo=mercadopago&logoColor=white" /></a>
   </p>
 
   <p>
@@ -105,6 +106,39 @@ El dispositivo debe poder acceder a esa dirección. Para distribuir una APK, nec
 ## ¿Tenés una idea?
 
 Las sugerencias son bienvenidas. Podés [proponer una mejora](https://github.com/nicolaschiabrandozanotti/Subite/issues/new) o [avisar de un problema](https://github.com/nicolaschiabrandozanotti/Subite/issues/new). Si querés aportar código, contactá primero al autor para acordar las condiciones de la contribución.
+
+## Bancá Subite 💙
+
+Subite es un proyecto independiente. Si te ayuda a moverte por Córdoba y querés acompañar su desarrollo, podés hacer un **aporte voluntario**. No hay suscripciones ni cobros automáticos.
+
+<div align="center">
+
+  <a href="https://mpago.la/1LqRS6N"><img alt="Apoyar Subite con Mercado Pago" src="https://img.shields.io/badge/Apoyar_con_Mercado_Pago-009EE3?style=for-the-badge&logo=mercadopago&logoColor=white" /></a>
+
+  <p><sub>O transferí al alias <strong><code>nicochiabrando</code></strong>.</sub></p>
+
+</div>
+
+<details>
+<summary><strong>Ver datos para transferir</strong></summary>
+
+**Alias**
+
+```text
+nicochiabrando
+```
+
+**CVU**
+
+```text
+0000003100012189129203
+```
+
+**Titular:** Nicolás Chiabrando Zanotti
+
+</details>
+
+<sub>Comprobá el destinatario en Mercado Pago antes de confirmar la transferencia. ¡Gracias por apoyar el proyecto!</sub>
 
 ## Licencia y uso
 
