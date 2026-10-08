@@ -82,5 +82,9 @@ indice y SHA-256 antes de cambiar la referencia activa. Los archivos viven en
 application support y sobreviven a actualizaciones de la APK. La capa exige
 Wi-Fi antes de descargar mediante el canal Android bondi/device. El mapa ya no
 se incluye en la APK; el generador y su fuente quedan en el repositorio.
-Actualizar mapa vuelve a consultar el indice publicado; si el checksum no cambia
+La actualizacion automatica consulta el indice publicado; si el checksum no cambia
 no descarga otra vez las imagenes. Un fallo conserva la generacion anterior.
+
+La capa no muestra un boton fijo de actualizacion. Carga primero el mapa local
+y descarga/actualiza automaticamente con Wi-Fi, con consultas limitadas a una
+cada 6 horas si ya hay mapa. El progreso solo aparece en la primera descarga.

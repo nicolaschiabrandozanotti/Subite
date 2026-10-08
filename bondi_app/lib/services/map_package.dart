@@ -66,6 +66,23 @@ class MapPackage extends ChangeNotifier {
   int received = 0;
   int? total;
   String? error;
+  int revision = 0;
+  DateTime? _lastAutomaticCheck;
+
+  Future<bool> updateOnWifi({required Future<bool> Function() hasWifi}) async {
+    if (downloading || !await hasWifi()) return false;
+    final current = await currentFiles();
+    final interval = current == null
+        ? const Duration(minutes: 1)
+        : const Duration(hours: 6);
+    final last = _lastAutomaticCheck;
+    if (last != null && DateTime.now().difference(last) < interval) {
+      return false;
+    }
+    _lastAutomaticCheck = DateTime.now();
+    return download();
+  }
+
   Future<Directory> _root() async {
     final root = Directory('${(await _directory()).path}/maps');
     await root.create(recursive: true);
@@ -156,6 +173,7 @@ class MapPackage extends ChangeNotifier {
       final pointer = File('${root.path}/active.next');
       await pointer.writeAsString(jsonEncode({'sha256': hash}), flush: true);
       await pointer.rename('${root.path}/active.json');
+      revision++;
       return true;
     } catch (_) {
       error = 'No se pudo descargar el mapa. Conectate a Wi-Fi y reintenta.';

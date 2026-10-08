@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -11,31 +13,64 @@ class OfflineMapLayer extends StatefulWidget {
   State<OfflineMapLayer> createState() => _OfflineMapLayerState();
 }
 
-class _OfflineMapLayerState extends State<OfflineMapLayer> {
+class _OfflineMapLayerState extends State<OfflineMapLayer>
+    with WidgetsBindingObserver {
   Future<RasterMap> _map = RasterMap.load();
-  String? _message;
-  Future<void> _download() async {
+  Timer? _wifiCheck;
+  bool _checking = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _sync());
+    _wifiCheck = Timer.periodic(const Duration(seconds: 30), (_) => _sync());
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _sync();
+  }
+
+  Future<void> _sync() async {
+    if (!mounted ||
+        _checking ||
+        WidgetsBinding.instance.lifecycleState == AppLifecycleState.paused) {
+      return;
+    }
+    _checking = true;
     try {
-      final wifi = await const MethodChannel('bondi/device')
-          .invokeMethod<bool>('wifi');
-      if (wifi != true) {
-        if (mounted) {
-          setState(() => _message = 'Conectate a Wi-Fi para descargar el mapa');
-        }
-        return;
-      }
-      if (await MapPackage.instance.download() && mounted) {
+      // Finish reading the saved map before deciding whether it needs downloading.
+      var hadMap = false;
+      try {
+        await _map;
+        hadMap = true;
+      } catch (_) {}
+      if (!mounted) return;
+      final package = MapPackage.instance;
+      final revision = package.revision;
+      final success = await package.updateOnWifi(
+        hasWifi: () async =>
+            await const MethodChannel('bondi/device')
+                .invokeMethod<bool>('wifi') ==
+            true,
+      );
+      if (success && (!hadMap || package.revision != revision) && mounted) {
         RasterMap.invalidate();
-        setState(() {
-          _map = RasterMap.load();
-          _message = null;
-        });
+        setState(() => _map = RasterMap.load());
       }
     } catch (_) {
-      if (mounted) {
-        setState(() => _message = 'No se pudo comprobar la conexion Wi-Fi');
-      }
+      // A saved map stays usable when the connection check fails.
+    } finally {
+      _checking = false;
     }
+  }
+
+  @override
+  void dispose() {
+    _wifiCheck?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
   @override
@@ -45,76 +80,59 @@ class _OfflineMapLayerState extends State<OfflineMapLayer> {
       listenable: MapPackage.instance,
       builder: (context, _) {
         final package = MapPackage.instance;
-        final ready = snapshot.hasData;
-        final control = package.downloading
-            ? SizedBox(
-                width: 240,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    LinearProgressIndicator(
-                      value: package.total == null
-                          ? null
-                          : package.received / package.total!,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Descargando mapa: ${(package.received / 1000000).toStringAsFixed(1)} / ${package.total == null ? "…" : (package.total! / 1000000).toStringAsFixed(1)} MB',
-                    ),
-                  ],
-                ),
-              )
-            : Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (!ready)
-                    const Text(
-                      'Mapa de Cordoba sin conexion',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  if (!ready)
-                    const Text('Descargalo una vez con Wi-Fi (43 MB)'),
-                  if (package.error != null || _message != null)
-                    SizedBox(
-                      width: 240,
-                      child: Text(
-                        _message ?? package.error!,
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  TextButton.icon(
-                    onPressed: _download,
-                    icon: const Icon(Icons.download),
-                    label: Text(
-                      ready ? 'Actualizar mapa' : 'Descargar mapa de Cordoba',
-                    ),
-                  ),
-                ],
-              );
-        return Stack(
-          children: [
-            if (ready)
-              TileLayer(
-                tileProvider: snapshot.data!,
-                tileBounds: snapshot.data!.bounds,
-                minNativeZoom: snapshot.data!.minZoom,
-                maxNativeZoom: snapshot.data!.maxZoom,
-              ),
-            Align(
-              alignment: ready ? Alignment.topLeft : Alignment.center,
+        if (snapshot.hasData) {
+          final map = snapshot.data!;
+          return TileLayer(
+            tileProvider: map,
+            tileBounds: map.bounds,
+            minNativeZoom: map.minZoom,
+            maxNativeZoom: map.maxZoom,
+          );
+        }
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        return Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Material(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
               child: Padding(
-                padding: EdgeInsets.fromLTRB(12, ready ? 190 : 12, 12, 12),
-                child: Material(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: control,
+                padding: const EdgeInsets.all(16),
+                child: SizedBox(
+                  width: 240,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        'Preparando mapa de Córdoba',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 12),
+                      if (package.downloading) ...[
+                        LinearProgressIndicator(
+                          value: package.total == null
+                              ? null
+                              : package.received / package.total!,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Descargando: ${(package.received / 1000000).toStringAsFixed(1)} / ${package.total == null ? "…" : (package.total! / 1000000).toStringAsFixed(1)} MB',
+                        ),
+                      ] else
+                        Text(
+                          package.error == null
+                              ? 'Se descarga automáticamente al conectarte a Wi-Fi (43 MB).'
+                              : 'La descarga se interrumpió. Se reintentará con Wi-Fi.',
+                          textAlign: TextAlign.center,
+                        ),
+                    ],
                   ),
                 ),
               ),
             ),
-          ],
+          ),
         );
       },
     ),

@@ -104,4 +104,41 @@ void main() {
     expect(await old.readAsBytes(), original);
     store.dispose();
   });
+  test(
+    'Automatic sync waits for Wi-Fi and downloads when it becomes available',
+    () async {
+      final store = package();
+      expect(await store.updateOnWifi(hasWifi: () async => false), isFalse);
+      expect(await store.currentFiles(), isNull);
+      expect(store.downloading, isFalse);
+      expect(await store.updateOnWifi(hasWifi: () async => true), isTrue);
+      expect(await (await store.currentFiles())!.$2.readAsBytes(), original);
+      expect(store.revision, 1);
+      store.dispose();
+    },
+  );
+  test('Automatic checks are throttled and unchanged maps are not downloaded again', () async {
+    final store = package();
+    expect(await store.download(), isTrue);
+    expect(await store.updateOnWifi(hasWifi: () async => true), isTrue);
+    expect(store.received, 0);
+    expect(store.revision, 1);
+    expect(await store.updateOnWifi(hasWifi: () async => true), isFalse);
+    store.dispose();
+  });
+  test(
+    'Failed automatic update preserves the map and is not retried in a loop',
+    () async {
+      final store = package();
+      expect(await store.download(), isTrue);
+      final old = (await store.currentFiles())!.$2;
+      bytes = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+      corrupt = true;
+      expect(await store.updateOnWifi(hasWifi: () async => true), isFalse);
+      expect((await store.currentFiles())!.$2.path, old.path);
+      expect(await store.updateOnWifi(hasWifi: () async => true), isFalse);
+      expect(await old.readAsBytes(), original);
+      store.dispose();
+    },
+  );
 }

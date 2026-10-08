@@ -64,6 +64,8 @@ void main() {
       isA<RasterMap>(),
     );
     expect(find.byType(OfflineMapLayer), findsOneWidget);
+    expect(find.text('Actualizar mapa'), findsNothing);
+    expect(find.textContaining('Descargar mapa'), findsNothing);
     expect(find.textContaining('no son en vivo'), findsOneWidget);
     expect(find.text('COLECTIVOS DEL RECORRIDO'), findsNothing);
     expect(find.text('Opciones del viaje'), findsOneWidget);
@@ -75,6 +77,9 @@ void main() {
   ) async {
     SharedPreferences.setMockInitialValues({});
     await tester.pumpWidget(const BondiApp());
+    await tester.runAsync(() async {
+      await Future<void>.delayed(Duration.zero);
+    });
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('journey-sheet-handle')), findsNothing);
     expect(find.text('COLECTIVOS DEL RECORRIDO'), findsNothing);
@@ -99,6 +104,9 @@ void main() {
       }),
     });
     await tester.pumpWidget(const BondiApp());
+    await tester.runAsync(() async {
+      await Future<void>.delayed(Duration.zero);
+    });
     await tester.pumpAndSettle();
     // A saved offline trip is now opened from the map's quick actions;
     // the details sheet stays hidden until a trip is selected.
