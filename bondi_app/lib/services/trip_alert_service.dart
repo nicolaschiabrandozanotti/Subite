@@ -26,8 +26,9 @@ class ProximityAlert {
         accuracy < 0 ||
         accuracy > 100 ||
         now.difference(timestamp).inSeconds > 15 ||
-        timestamp.isAfter(now.add(const Duration(seconds: 2))))
+        timestamp.isAfter(now.add(const Duration(seconds: 2)))) {
       return false;
+    }
     if (_previous != null && !timestamp.isAfter(_previous!)) return false;
     _previous = timestamp;
     final distance = const Distance()(position, target);
@@ -68,14 +69,17 @@ class TripAlertService extends ChangeNotifier {
     error = null;
     fired = false;
     try {
-      if (!await Geolocator.isLocationServiceEnabled())
+      if (!await Geolocator.isLocationServiceEnabled()) {
         throw Exception('Activá la ubicación del celular para usar el aviso.');
+      }
       var permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied)
+      if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
+      }
       if (permission == LocationPermission.denied ||
-          permission == LocationPermission.deniedForever)
+          permission == LocationPermission.deniedForever) {
         throw Exception('Hace falta permiso de ubicación para avisarte.');
+      }
       systemNotifications = await _notificationPermission();
       if (_disposed || version != _generation) return;
       target = stop;

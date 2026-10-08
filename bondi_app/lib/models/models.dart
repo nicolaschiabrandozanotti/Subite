@@ -1,4 +1,5 @@
 import 'dart:ui';
+
 import 'package:latlong2/latlong.dart';
 
 class Ruta {
@@ -66,9 +67,13 @@ class Linea {
       nombre: json['nombre']?.toString() ?? '',
       grupo: json['grupo']?.toString() ?? '',
       colorHex: json['color']?.toString() ?? '#009ee2',
-      clienteId: json['clienteId'] is int ? json['clienteId'] : int.tryParse(json['clienteId']?.toString() ?? '0') ?? 0,
+      clienteId: json['clienteId'] is int
+          ? json['clienteId']
+          : int.tryParse(json['clienteId']?.toString() ?? '0') ?? 0,
       clienteNombre: json['clienteNombre']?.toString() ?? 'Urbano',
-      rutas: rawRutas.map((r) => Ruta.fromJson(r as Map<String, dynamic>)).toList(),
+      rutas: rawRutas
+          .map((r) => Ruta.fromJson(r as Map<String, dynamic>))
+          .toList(),
     );
   }
 
@@ -112,14 +117,17 @@ class Coche {
 
   factory Coche.fromJson(Map<String, dynamic> json) {
     return Coche(
-      coche: json['coche'] is int ? json['coche'] : int.tryParse(json['coche']?.toString() ?? '0') ?? 0,
+      coche: json['coche'] is int
+          ? json['coche']
+          : int.tryParse(json['coche']?.toString() ?? '0') ?? 0,
       linea: json['linea']?.toString() ?? '',
       sentido: json['sentido']?.toString() ?? 'I',
       lat: (json['lat'] as num?)?.toDouble() ?? 0.0,
       lon: (json['lon'] as num?)?.toDouble() ?? 0.0,
       curso: (json['curso'] as num?)?.toDouble() ?? 0.0,
       demora: json['demora']?.toString() ?? 'A tiempo',
-      rampa: json['rampa'] == true || json['rampa'] == 1 || json['rampa'] == '1',
+      rampa:
+          json['rampa'] == true || json['rampa'] == 1 || json['rampa'] == '1',
       ultimaActualizacion: json['ultimaActualizacion']?.toString(),
       isPredictive: json['isPredictive'] == true,
     );
@@ -188,15 +196,20 @@ class Traza {
 
   factory Traza.fromJson(Map<String, dynamic> json) {
     final rawPuntos = json['puntos'] as List? ?? [];
-    final puntosList = rawPuntos.map((p) {
-      if (p is List && p.length >= 2) {
-        return LatLng((p[0] as num).toDouble(), (p[1] as num).toDouble());
-      }
-      return const LatLng(0, 0);
-    }).where((p) => p.latitude != 0 && p.longitude != 0).toList();
+    final puntosList = rawPuntos
+        .map((p) {
+          if (p is List && p.length >= 2) {
+            return LatLng((p[0] as num).toDouble(), (p[1] as num).toDouble());
+          }
+          return const LatLng(0, 0);
+        })
+        .where((p) => p.latitude != 0 && p.longitude != 0)
+        .toList();
 
     final rawParadas = json['paradas'] as List? ?? [];
-    final paradasList = rawParadas.map((par) => Parada.fromJson(par as Map<String, dynamic>)).toList();
+    final paradasList = rawParadas
+        .map((par) => Parada.fromJson(par as Map<String, dynamic>))
+        .toList();
 
     return Traza(
       lineaId: json['lineaId']?.toString() ?? '',

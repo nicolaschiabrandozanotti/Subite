@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:latlong2/latlong.dart';
 
 import 'package:bondi_app/models/models.dart';
 import 'package:bondi_app/services/offline_trip.dart';
@@ -42,7 +43,7 @@ void main() {
     SharedPreferences.setMockInitialValues({'offline_trip_v1': 'broken'});
     expect(await OfflineTrip.load(), isNull);
   });
-  test('Official arrival positions and receipt age survive restart and expire safely', () async {
+  test('Official arrival positions and receipt age survive restart and advance to route end', () async {
     SharedPreferences.setMockInitialValues({});
     final at = DateTime(2026, 10, 7, 17);
     final bus = Coche(
@@ -85,11 +86,11 @@ void main() {
       traza: loaded.trace,
       now: at.add(const Duration(minutes: 11)),
     ).single;
-    expect(expired.lat, a.lat);
+    expect(expired.lat, b.lat);
     expect(expired.isPredictive, isTrue);
     expect(loaded.buses.single.lat, a.lat);
   });
-  test('Old snapshots stop extrapolating and never mutate originals', () {
+  test('Old snapshots advance to route end and never mutate originals', () {
     final bus = Coche(
       coche: 1,
       linea: '70',
@@ -107,7 +108,7 @@ void main() {
       traza: trace,
       now: timestamp.add(const Duration(minutes: 11)),
     ).single;
-    expect(old.position, a.position);
+    expect(old.position, b.position);
     expect(old.isPredictive, isTrue);
     expect(old.demora, contains('11 min'));
     final fresh = PredictiveEngine.calculatePredictiveBuses(
@@ -118,5 +119,43 @@ void main() {
     ).single;
     expect(fresh.isPredictive, isTrue);
     expect(bus.isPredictive, isFalse);
+  });
+  test('Prediction advances from a fractional segment and keeps moving past ten minutes', () {
+    final at = DateTime(2026);
+    final longTrace = Traza(
+      lineaId: 'l',
+      rutaId: 'r',
+      colorHex: '',
+      puntos: [const LatLng(-31.5, -64.18), const LatLng(-31.3, -64.18)],
+      paradas: [],
+    );
+    final bus = Coche(
+      coche: 1,
+      linea: '70',
+      sentido: 'I',
+      lat: -31.45,
+      lon: -64.18,
+      curso: 0,
+      demora: '',
+      rampa: false,
+    );
+    Coche estimate(int seconds) => PredictiveEngine.calculatePredictiveBuses(
+      lastKnownBuses: [bus],
+      snapshotTime: at,
+      traza: longTrace,
+      now: at.add(Duration(seconds: seconds)),
+    ).single;
+    expect(estimate(0).lat, closeTo(bus.lat, .00001));
+    expect(estimate(-60).lat, closeTo(bus.lat, .00001));
+    final early = estimate(30), later = estimate(660);
+    expect(early.lat, greaterThan(bus.lat));
+    expect(later.lat, greaterThan(early.lat));
+    expect(later.lat, lessThan(longTrace.puntos.last.latitude));
+    expect(
+      const Distance().as(LengthUnit.Meter, bus.position, early.position),
+      closeTo(150, 2),
+    );
+    expect(bus.lat, -31.45);
+    expect(estimate(99999).position, longTrace.puntos.last);
   });
 }

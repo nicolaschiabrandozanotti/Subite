@@ -5,30 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'api_service.dart';
-
-/// Parses the provider's Córdoba wall-clock arrival time, not vehicle delay.
-int? arrivalSeconds(String value, DateTime cordobaNow) {
-  final match = RegExp(r'^(\d{1,2}):(\d{2})(?::(\d{2}))?$')
-      .firstMatch(value.trim());
-  if (match == null) return null;
-  final hour = int.parse(match[1]!),
-      minute = int.parse(match[2]!),
-      second = int.parse(match[3] ?? '0');
-  if (hour > 23 || minute > 59 || second > 59) return null;
-  var delta =
-      hour * 3600 +
-      minute * 60 +
-      second -
-      (cordobaNow.hour * 3600 + cordobaNow.minute * 60 + cordobaNow.second);
-  if (cordobaNow.hour == 23 && hour == 0) delta += 86400;
-  return delta >= 0 && delta <= 4800 ? delta : null;
-}
-
-int? stopArrivalSeconds(Map<String, dynamic> item, DateTime now) {
-  // The adjusted stop arrival has seconds. Vehicle delay and distance are not ETA.
-  return arrivalSeconds('${item['horaTeoricaAjustada'] ?? ''}', now) ??
-      arrivalSeconds('${item['hora_salida'] ?? ''}', now);
-}
+import 'arrival_time.dart';
 
 class ArrivalAlert extends ChangeNotifier {
   static const channel = MethodChannel('bondi/notifications');
@@ -66,9 +43,10 @@ class ArrivalAlert extends ChangeNotifier {
     minutes = threshold;
     bool notifications = false;
     try {
-      if (Platform.isAndroid)
+      if (Platform.isAndroid) {
         notifications =
             await channel.invokeMethod<bool>('requestPermission') ?? false;
+      }
     } catch (_) {}
     if (_disposed || version != _generation) return;
     active = true;
@@ -92,8 +70,9 @@ class ArrivalAlert extends ChangeNotifier {
               id <= 0 ||
               (vehicle != null && id != vehicle) ||
               '${item['ruta']}' != route ||
-              '${item['linea']}' != line)
+              '${item['linea']}' != line) {
             continue;
+          }
           final seconds = stopArrivalSeconds(item, now);
           if (seconds != null && (nearest == null || seconds < nearest)) {
             nearest = seconds;
@@ -121,8 +100,9 @@ class ArrivalAlert extends ChangeNotifier {
           }
         }
       } catch (_) {
-        if (!_disposed && version == _generation && active)
+        if (!_disposed && version == _generation && active) {
           status = 'No pudimos actualizar el horario. Volvemos a intentar…';
+        }
       } finally {
         _polling = false;
         _changed();
@@ -130,8 +110,9 @@ class ArrivalAlert extends ChangeNotifier {
     }
 
     await poll();
-    if (!_disposed && version == _generation && active)
+    if (!_disposed && version == _generation && active) {
       _timer = Timer.periodic(const Duration(seconds: 20), (_) => poll());
+    }
   }
 
   @override

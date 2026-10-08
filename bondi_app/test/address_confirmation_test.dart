@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:bondi_app/screens/journey_screen.dart';
+import 'package:bondi_app/widgets/confirm_address_point.dart';
 import 'package:bondi_app/models/models.dart';
 import 'package:bondi_app/services/place_search_service.dart';
 
@@ -58,4 +58,3 @@ void main() {
     await tester.pumpWidget(const SizedBox());
   });
 }
-

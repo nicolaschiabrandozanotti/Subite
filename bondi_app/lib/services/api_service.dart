@@ -5,7 +5,6 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/models.dart';
-import 'predictive_engine.dart';
 
 class ApiService {
   static final http.Client _client = http.Client();
@@ -42,10 +41,6 @@ class ApiService {
   );
 
   // 1. Fetch Lineas (Offline-first)
-  static Future<List<Linea>> asyncFetchLineas() async {
-    return fetchLineas();
-  }
-
   static Future<List<Linea>> fetchLineas() async {
     final existing = _lineLoad;
     if (existing != null) return existing;
@@ -239,80 +234,4 @@ class ApiService {
     } catch (_) {}
   }
 
-  // 3. Fetch Live or Predictive Buses
-  static Future<Map<String, dynamic>> fetchCoches({
-    required String rutaId,
-    required int clienteId,
-    required String lineaNombre,
-    required Traza? traza,
-    bool offline = false,
-  }) async {
-    final prefs = await SharedPreferences.getInstance();
-    final cacheKey = 'last_coches_v2_${clienteId}_${rutaId}_$lineaNombre';
-
-    // 1. Try real GPS from network
-    if (!offline) {
-      try {
-        final res = await _http
-            .get(
-              Uri.parse('$baseUrl/coches').replace(
-                queryParameters: {
-                  'ruta': rutaId,
-                  'cliente': '$clienteId',
-                  'linea': lineaNombre,
-                },
-              ),
-            )
-            .timeout(const Duration(seconds: 5));
-
-        if (res.statusCode == 200) {
-          final data = jsonDecode(res.body);
-          final raw = data['coches'] as List;
-          final coches = raw
-              .map((c) => Coche.fromJson(c as Map<String, dynamic>))
-              .toList();
-
-          // Save last known snapshot
-          if (coches.isNotEmpty) {
-            await prefs.setString(
-              cacheKey,
-              jsonEncode({
-                'coches': coches.map((c) => c.toJson()).toList(),
-                'timestamp': DateTime.now().millisecondsSinceEpoch,
-              }),
-            );
-          }
-
-          return {'coches': coches, 'isPredictive': false};
-        }
-      } catch (_) {
-        // Network failed or offline
-      }
-    }
-
-    // 2. Offline: Use Predictive Engine from local snapshot
-    String? rawCached = prefs.getString(cacheKey);
-    if (rawCached != null) {
-      try {
-        final data = jsonDecode(rawCached);
-        final rawList = data['coches'] as List? ?? [];
-        final ts = DateTime.fromMillisecondsSinceEpoch(
-          data['timestamp'] as int,
-        );
-        final cachedBuses = rawList
-            .map((c) => Coche.fromJson(c as Map<String, dynamic>))
-            .toList();
-
-        final projected = PredictiveEngine.calculatePredictiveBuses(
-          lastKnownBuses: cachedBuses,
-          snapshotTime: ts,
-          traza: traza,
-        );
-
-        return {'coches': projected, 'isPredictive': true};
-      } catch (_) {}
-    }
-
-    return {'coches': <Coche>[], 'isPredictive': true};
-  }
 }

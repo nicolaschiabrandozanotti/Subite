@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bondi_app/main.dart';
 import 'package:bondi_app/widgets/bus_marker.dart';
+import 'package:bondi_app/widgets/offline_map_layer.dart';
 import 'package:flutter_map/flutter_map.dart';
 
 void main() {
@@ -50,6 +51,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(BusMarker), findsWidgets);
     expect(find.byType(TileLayer), findsNothing);
+    expect(find.byType(OfflineMapLayer), findsOneWidget);
     expect(find.textContaining('no son en vivo'), findsOneWidget);
     expect(find.text('COLECTIVOS DEL RECORRIDO'), findsNothing);
     expect(find.text('Opciones del viaje'), findsOneWidget);

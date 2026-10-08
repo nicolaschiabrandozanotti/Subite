@@ -81,8 +81,9 @@ class JourneyPlanner {
       // Far stops cannot be either endpoint; avoid projecting every stop onto
       // hundreds of geometry segments on a low-end phone.
       if (_distance(origin, stop.position) > 800 &&
-          _distance(destination, stop.position) > 800)
+          _distance(destination, stop.position) > 800) {
         continue;
+      }
       final position = progress(stop.position, trace.puntos);
       if (position != null) ordered.add((stop, position));
     }
@@ -107,8 +108,9 @@ class JourneyPlanner {
         if (best == null ||
             candidate.walkStart < best.walkStart ||
             (candidate.walkStart == best.walkStart &&
-                candidate.walkEnd < best.walkEnd))
+                candidate.walkEnd < best.walkEnd)) {
           best = candidate;
+        }
       }
     }
     return best;

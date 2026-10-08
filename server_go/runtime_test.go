@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -84,5 +85,85 @@ func TestPortValidation(t *testing.T) {
 	}
 	if addr, err := listenAddress("8080"); err != nil || addr != ":8080" {
 		t.Fatal(addr, err)
+	}
+}
+
+func TestUpstreamCancellationReleasesCapacity(t *testing.T) {
+	for _, session := range []bool{false, true} {
+		t.Run(map[bool]string{false: "request", true: "session"}[session], func(t *testing.T) {
+			s := NewBondiServer()
+			if !session {
+				s.cookie, s.cookieExpiry = "test", time.Now().Add(time.Hour)
+			}
+			started := make(chan struct{})
+			s.client.Transport = arrivalsTransport(func(r *http.Request) (*http.Response, error) {
+				close(started)
+				<-r.Context().Done()
+				return nil, r.Context().Err()
+			})
+			ctx, cancel := context.WithCancel(context.Background())
+			defer cancel()
+			done := make(chan error, 1)
+			go func() { _, err := s.arrivals(ctx, "123"); done <- err }()
+			select {
+			case <-started:
+			case <-time.After(time.Second):
+				t.Fatal("upstream did not start")
+			}
+			cancel()
+			select {
+			case err := <-done:
+				if !errors.Is(err, context.Canceled) {
+					t.Fatalf("got %v", err)
+				}
+			case <-time.After(time.Second):
+				t.Fatal("upstream ignored cancellation")
+			}
+			if len(s.upstreamSlots) != 0 || len(s.arrivalsSlots) != 0 || len(s.arrivalsFlights) != 0 || len(s.arrivalsCache) != 0 {
+				t.Fatal("cancelled work retained capacity or cached response")
+			}
+		})
+	}
+}
+
+type observedWaitContext struct {
+	context.Context
+	waiting chan struct{}
+	once    sync.Once
+}
+
+func (c *observedWaitContext) Done() <-chan struct{} {
+	c.once.Do(func() { close(c.waiting) })
+	return c.Context.Done()
+}
+
+func TestConnectedWaiterRetriesCancelledFlight(t *testing.T) {
+	s := NewBondiServer()
+	s.cookie, s.cookieExpiry = "test", time.Now().Add(time.Hour)
+	flight := &arrivalFlight{done: make(chan struct{}), err: context.Canceled}
+	s.arrivalsFlights["123"] = flight
+	s.client.Transport = arrivalsTransport(func(*http.Request) (*http.Response, error) {
+		return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(`{"proximos_arribos":[]}`)), Header: make(http.Header)}, nil
+	})
+	done := make(chan error, 1)
+	ctx := &observedWaitContext{Context: context.Background(), waiting: make(chan struct{})}
+	go func() { _, err := s.arrivals(ctx, "123"); done <- err }()
+	select {
+	case <-ctx.waiting:
+	case <-time.After(time.Second):
+		t.Fatal("waiter did not join flight")
+	}
+	// Removal and completion have the same ordering as a cancelled leader.
+	s.arrivalsMu.Lock()
+	delete(s.arrivalsFlights, "123")
+	close(flight.done)
+	s.arrivalsMu.Unlock()
+	select {
+	case err := <-done:
+		if err != nil {
+			t.Fatal(err)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("waiter failed to retry")
 	}
 }
