@@ -2323,35 +2323,54 @@ class _JourneyScreenState extends State<JourneyScreen>
                     child: LayoutBuilder(
                       builder: (ctx, bounds) => ListView.separated(
                         scrollDirection: Axis.horizontal,
-                        itemCount: _journeys.isEmpty ? 1 : _journeys.length,
+                        itemCount:
+                            (_journeys.isEmpty ? 1 : _journeys.length) +
+                            (_preparedTrip != null && !_offline ? 1 : 0),
                         separatorBuilder: (_, _) => const SizedBox(width: 8),
-                        itemBuilder: (_, i) => SizedBox(
-                          width: (bounds.maxWidth - 8) / 2,
-                          child: OutlinedButton.icon(
-                            onPressed: _journeys.isEmpty
-                                ? _manageJourneys
-                                : () =>
-                                      _useJourney(_journeys[i], origin: false),
-                            icon: Icon(
-                              _journeys.isEmpty
-                                  ? Icons.add
-                                  : Icons.bookmark_outline,
-                              size: 16,
-                            ),
-                            label: Text(
-                              _journeys.isEmpty
-                                  ? 'Crear viaje'
-                                  : _journeys[i].name,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            style: OutlinedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
+                        itemBuilder: (_, i) {
+                          final savedCount = _journeys.isEmpty
+                              ? 1
+                              : _journeys.length;
+                          final isOfflineShortcut =
+                              _preparedTrip != null &&
+                              !_offline &&
+                              i == savedCount;
+                          return SizedBox(
+                            width: (bounds.maxWidth - 8) / 2,
+                            child: OutlinedButton.icon(
+                              onPressed: isOfflineShortcut
+                                  ? _openOffline
+                                  : _journeys.isEmpty
+                                  ? _manageJourneys
+                                  : () => _useJourney(
+                                        _journeys[i],
+                                        origin: false,
+                                      ),
+                              icon: Icon(
+                                isOfflineShortcut
+                                    ? Icons.offline_pin_outlined
+                                    : _journeys.isEmpty
+                                    ? Icons.add
+                                    : Icons.bookmark_outline,
+                                size: 16,
+                              ),
+                              label: Text(
+                                isOfflineShortcut
+                                    ? 'Abrir viaje sin datos'
+                                    : _journeys.isEmpty
+                                    ? 'Crear viaje'
+                                    : _journeys[i].name,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              style: OutlinedButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                ),
                               ),
                             ),
-                          ),
-                        ),
+                          );
+                        },
                       ),
                     ),
                   ),
