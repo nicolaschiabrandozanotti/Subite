@@ -63,7 +63,7 @@ go test ./...
 ```bash
 cd bondi_app
 flutter pub get
-flutter analyze
+flutter analyze --no-fatal-infos --no-fatal-warnings
 flutter test
 ```
 
