@@ -52,10 +52,12 @@ void main() {
   ) async {
     final loaded = await tester.runAsync(() => OfflineBasemap.load());
     expect(loaded!.features, isNotEmpty);
+    final controller = MapController();
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: FlutterMap(
+            mapController: controller,
             options: const MapOptions(
               initialCenter: LatLng(-31.42, -64.18),
               initialZoom: 15,
@@ -79,6 +81,17 @@ void main() {
     final roads = tester.widget<PolylineLayer>(roadLayer);
     expect(roads.polylines, isNotEmpty);
     expect(roads.polylines.length, lessThan(10000));
+    final previousRoads = roads.polylines;
+    controller.move(const LatLng(-31.4201, -64.1801), 15);
+    await tester.pump();
+    expect(
+      identical(
+        tester.widget<PolylineLayer>(roadLayer).polylines,
+        previousRoads,
+      ),
+      isTrue,
+    );
     await tester.pumpWidget(const SizedBox());
+    controller.dispose();
   });
 }

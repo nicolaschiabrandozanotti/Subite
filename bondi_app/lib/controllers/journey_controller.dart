@@ -133,6 +133,7 @@ class JourneyController extends ChangeNotifier {
   }
 
   void setEndpoints({Parada? origin, Parada? destination}) {
+    _automaticOffline = true;
     cancelPlanning();
     _update(() {
       if (origin != null) {
@@ -272,11 +273,17 @@ class JourneyController extends ChangeNotifier {
     super.dispose();
   }
 
+  bool _automaticOffline = true;
+
   Future<void> reconnect() async {
     if (!_offline || !_inTrip) return;
     ++_request;
     ++_arrivalRequest;
-    _update(() => _offline = false);
+    _automaticOffline = false;
+    _update(() {
+      _offline = false;
+      _setBusPositions([]);
+    });
     await refresh();
     if (_active) _scheduleUpdates();
   }
@@ -444,6 +451,7 @@ class JourneyController extends ChangeNotifier {
   Future<void> openOffline() async {
     final trip = _preparedTrip;
     if (trip == null) return;
+    _automaticOffline = true;
     ++_planningToken;
     ++_request;
     _timer?.cancel();
@@ -672,7 +680,7 @@ class JourneyController extends ChangeNotifier {
         return;
       }
       final saved = _preparedTrip;
-      if (saved != null && _matchesPreparedTrip(saved)) {
+      if (_automaticOffline && saved != null && _matchesPreparedTrip(saved)) {
         await openOffline();
         _message(
           'No pudimos conectar. Mostramos ubicaciones aproximadas guardadas.',

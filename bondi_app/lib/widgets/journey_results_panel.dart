@@ -259,7 +259,7 @@ class JourneyResultsPanel extends StatelessWidget {
               if (journey.offline)
                 TextButton(
                   onPressed: onReconnect,
-                  child: const Text('Volver a conectar'),
+                  child: const Text('Salir del modo sin datos'),
                 ),
               TextButton.icon(
                 onPressed: onPreferences,

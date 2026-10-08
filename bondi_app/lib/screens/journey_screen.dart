@@ -918,7 +918,7 @@ class _JourneyScreenState extends State<JourneyScreen>
                           ),
                           TextButton(
                             onPressed: () => _journey.reconnect(),
-                            child: const Text('Volver a conectar'),
+                            child: const Text('Salir del modo sin datos'),
                           ),
                         ],
                         const SizedBox(height: 17),

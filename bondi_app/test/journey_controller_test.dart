@@ -323,11 +323,12 @@ void main() {
     await c.openOffline();
     failed = true;
     await c.reconnect();
-    expect(c.offline, isTrue);
+    expect(c.offline, isFalse);
+    expect(c.arrivalError, isNotNull);
     expect(c.pickup, a);
     expect(c.dropoff, b);
     failed = false;
-    await c.reconnect();
+    await c.refresh();
     expect(c.offline, isFalse);
     expect(c.inTrip, isTrue);
     expect(c.pickup, a);

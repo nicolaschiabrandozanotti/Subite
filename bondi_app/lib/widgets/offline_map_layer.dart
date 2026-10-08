@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../services/offline_basemap.dart';
 
@@ -11,6 +12,11 @@ class OfflineMapLayer extends StatefulWidget {
 
 class _OfflineMapLayerState extends State<OfflineMapLayer> {
   final _map = OfflineBasemap.load();
+  LatLngBounds? _loadedBounds;
+  int? _zoomLevel;
+  List<MapFeature> _features = [];
+  List<Polyline> _roads = [];
+  List<Polygon> _parks = [];
   static const _major = {
     'motorway',
     'trunk',
@@ -38,14 +44,30 @@ class _OfflineMapLayerState extends State<OfflineMapLayer> {
             ),
           );
         }
-        final roads = <Polyline>[];
-        final parks = <Polygon>[];
+        final visible = camera.visibleBounds;
+        final rebuild =
+            _zoomLevel != camera.zoom.floor() ||
+            _loadedBounds == null ||
+            !_loadedBounds!.contains(visible.southWest) ||
+            !_loadedBounds!.contains(visible.northEast);
+        if (rebuild) {
+          final latMargin = (visible.north - visible.south) * .5;
+          final lonMargin = (visible.east - visible.west) * .5;
+          _loadedBounds = LatLngBounds(
+            LatLng(visible.south - latMargin, visible.west - lonMargin),
+            LatLng(visible.north + latMargin, visible.east + lonMargin),
+          );
+          _zoomLevel = camera.zoom.floor();
+          _features = snapshot.data!.visibleFeatures(_loadedBounds!).toList();
+          _roads = [];
+          _parks = [];
+        }
+        final roads = _roads;
+        final parks = _parks;
         final labels = <Marker>[];
         final names = <String>{};
         final cells = <String>{};
-        for (final feature in snapshot.data!.visibleFeatures(
-          camera.visibleBounds,
-        )) {
+        for (final feature in _features) {
           final major = _major.contains(feature.kind);
           if (camera.zoom < 13 &&
               !major &&
@@ -54,30 +76,32 @@ class _OfflineMapLayerState extends State<OfflineMapLayer> {
             continue;
           }
           if (feature.kind == 'park') {
-            if (feature.points.length >= 3) {
+            if (rebuild && feature.points.length >= 3) {
               parks.add(
                 Polygon(points: feature.points, color: const Color(0xFFD7E6CD)),
               );
             }
             continue;
           }
-          roads.add(
-            Polyline(
-              points: feature.points,
-              strokeWidth: feature.kind == 'water'
-                  ? 3
-                  : major
-                  ? 3.5
-                  : 1.5,
-              color: feature.kind == 'water'
-                  ? const Color(0xFF9ACEDB)
-                  : major
-                  ? const Color(0xFFFFE4AD)
-                  : Colors.white,
-              borderStrokeWidth: feature.kind == 'water' ? 0 : .5,
-              borderColor: const Color(0xFFD1CEC5),
-            ),
-          );
+          if (rebuild) {
+            roads.add(
+              Polyline(
+                points: feature.points,
+                strokeWidth: feature.kind == 'water'
+                    ? 3
+                    : major
+                    ? 3.5
+                    : 1.5,
+                color: feature.kind == 'water'
+                    ? const Color(0xFF9ACEDB)
+                    : major
+                    ? const Color(0xFFFFE4AD)
+                    : Colors.white,
+                borderStrokeWidth: 0,
+                borderColor: const Color(0xFFD1CEC5),
+              ),
+            );
+          }
           if (camera.zoom < 14 ||
               feature.name.isEmpty ||
               labels.length >= 35 ||
