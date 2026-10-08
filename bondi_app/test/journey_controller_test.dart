@@ -1,5 +1,8 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
+import 'package:bondi_app/widgets/journey_preferences_sheet.dart';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bondi_app/controllers/journey_controller.dart';
@@ -351,4 +354,51 @@ void main() {
     expect(c.reachableArrival(trip('1')), isNull);
     expect(c.buses, isEmpty);
   });
+  test(
+    'Line loading stays pending when endpoints change before response',
+    () async {
+      final pending = Completer<List<Linea>>();
+      final c = JourneyController(fetchLines: () => pending.future);
+      addTearDown(c.dispose);
+      final load = c.load();
+      c.setEndpoints(origin: a, destination: b);
+      expect(c.loadingLines, isTrue);
+      pending.complete([line('1')]);
+      await load;
+      expect(c.loadingLines, isFalse);
+      expect(c.lines.single.id, '1');
+    },
+  );
+  testWidgets(
+    'Preferences distinguish pending lines from an unavailable route',
+    (tester) async {
+      final pending = Completer<List<Linea>>();
+      final c = JourneyController(fetchLines: () => pending.future);
+      final load = c.load();
+      c.setEndpoints(origin: a, destination: b);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: JourneyPreferencesSheet(
+              journey: c,
+              onEditEndpoint: (_) {},
+              onFindJourneys: () {},
+              onSaveDestination: () {},
+              onPickLine: () async {},
+              onChooseTrip: (_) {},
+            ),
+          ),
+        ),
+      );
+      expect(find.text('Cargando líneas y recorrido…'), findsOneWidget);
+      expect(find.textContaining('Este recorrido no tiene'), findsNothing);
+      pending.complete([]);
+      await load;
+      await tester.pump();
+      expect(find.text('Cargando líneas y recorrido…'), findsNothing);
+      expect(find.textContaining('Este recorrido no tiene'), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+      c.dispose();
+    },
+  );
 }

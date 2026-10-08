@@ -53,6 +53,8 @@ class JourneyController extends ChangeNotifier {
       _polling = false;
   bool get _active => !_disposed;
 
+  bool _loadingLines = true;
+  bool get loadingLines => _loadingLines;
   List<Linea> _lines = [];
   Linea? _line;
   Ruta? _route;
@@ -127,6 +129,7 @@ class JourneyController extends ChangeNotifier {
     _update(() => _preparedTrip = prepared);
     final lines = await _fetchLines();
     _update(() {
+      _loadingLines = false;
       _lines = lines;
       _loading = false;
     });

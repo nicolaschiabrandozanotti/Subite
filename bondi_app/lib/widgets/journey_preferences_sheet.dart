@@ -23,6 +23,8 @@ class JourneyPreferencesSheet extends StatelessWidget {
   Widget build(BuildContext context) => AnimatedBuilder(
     animation: journey,
     builder: (context, _) {
+      final pending =
+          journey.loadingLines || journey.loading || journey.planning;
       final hasOrigin = journey.hasOrigin;
       final nearest = journey.currentJourney()?.boarding;
       final pickup = journey.pickupPreference == PickupPreference.nearest
@@ -159,7 +161,9 @@ class JourneyPreferencesSheet extends StatelessWidget {
                     !hasOrigin
                         ? 'Elegí el inicio para encontrar una parada cercana.'
                         : nearest == null
-                        ? 'No hay paradas disponibles para este recorrido.'
+                        ? (pending
+                              ? 'Cargando recorrido…'
+                              : 'No hay paradas disponibles para este recorrido.')
                         : nearest.nombre,
                     style: const TextStyle(fontSize: 13, color: ink),
                   ),
@@ -190,7 +194,9 @@ class JourneyPreferencesSheet extends StatelessWidget {
                   ),
                 const SizedBox(height: 18),
                 Text(
-                  candidate == null
+                  pending
+                      ? 'Cargando líneas y recorrido…'
+                      : candidate == null
                       ? 'Este recorrido no tiene un viaje directo válido con estas preferencias. Buscá otras líneas.'
                       : 'Bajás en ${candidate.alighting.nombre}. A pie aprox.: ${candidate.walkStart.round()} m al subir y ${candidate.walkEnd.round()} m al llegar. Llegadas de bondis aún sin confirmar.',
                   style: const TextStyle(

@@ -561,42 +561,65 @@ class _JourneyScreenState extends State<JourneyScreen>
       context: context,
       showDragHandle: true,
       isScrollControlled: true,
-      builder: (ctx) => SizedBox(
-        height: MediaQuery.sizeOf(ctx).height * .65,
-        child: Column(
-          children: [
-            const Text(
-              'Elegí línea y sentido',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-            Expanded(
-              child: ListView(
-                children: _journey.lines
-                    .expand(
-                      (line) => line.rutas.map(
-                        (route) => ListTile(
-                          leading: CircleAvatar(
-                            backgroundColor: pale,
-                            child: Text(
-                              line.nombre,
-                              style: const TextStyle(color: blue, fontSize: 12),
-                            ),
-                          ),
-                          title: Text(route.nombre),
-                          subtitle: Text(
-                            'Línea ${line.nombre} · ${route.sentido}',
-                          ),
-                          onTap: () async {
-                            Navigator.pop(ctx);
-                            await _selectLine(line, route);
-                          },
-                        ),
-                      ),
-                    )
-                    .toList(),
+      builder: (ctx) => AnimatedBuilder(
+        animation: _journey,
+        builder: (_, _) => SizedBox(
+          height: MediaQuery.sizeOf(ctx).height * .65,
+          child: Column(
+            children: [
+              const Text(
+                'Elegí línea y sentido',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
-            ),
-          ],
+              Expanded(
+                child: _journey.loadingLines
+                    ? const Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            CircularProgressIndicator(),
+                            SizedBox(height: 12),
+                            Text('Cargando líneas…'),
+                          ],
+                        ),
+                      )
+                    : _journey.lines.isEmpty
+                    ? const Center(
+                        child: Text(
+                          'No se pudieron cargar las líneas. Volvé a intentar.',
+                        ),
+                      )
+                    : ListView(
+                        children: _journey.lines
+                            .expand(
+                              (line) => line.rutas.map(
+                                (route) => ListTile(
+                                  leading: CircleAvatar(
+                                    backgroundColor: pale,
+                                    child: Text(
+                                      line.nombre,
+                                      style: const TextStyle(
+                                        color: blue,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ),
+                                  title: Text(route.nombre),
+                                  subtitle: Text(
+                                    'Línea ${line.nombre} · ${route.sentido}',
+                                  ),
+                                  onTap: () async {
+                                    Navigator.pop(ctx);
+                                    await _selectLine(line, route);
+                                  },
+                                ),
+                              ),
+                            )
+                            .toList(),
+                      ),
+              ),
+            ],
+          ),
         ),
       ),
     );
