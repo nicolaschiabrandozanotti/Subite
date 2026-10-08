@@ -1,0 +1,5 @@
+**
+!Dockerfile
+!server_go/
+!server_go/**
+server_go/*.exe

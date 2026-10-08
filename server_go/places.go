@@ -17,7 +17,7 @@ func normalizePlaceQuery(q string) string {
 	q = strings.ToLower(strings.TrimSpace(q))
 	q = strings.NewReplacer("á", "a", "é", "e", "í", "i", "ó", "o", "ú", "u", "ü", "u").Replace(q)
 	q = strings.Join(strings.Fields(q), " ")
-	q = regexp.MustCompile(`^(avenida|av\.?|avda\.?|calle)\s+`).ReplaceAllString(q, "")
+	q = streetPrefix.ReplaceAllString(q, "")
 	switch q {
 	case "utn", "utn frc", "frc", "universidad tecnologica":
 		return "Universidad Tecnológica Nacional"
@@ -38,6 +38,8 @@ var placeCache = struct {
 }{entries: make(map[string]placeCacheEntry)}
 var placeClient = &http.Client{Timeout: 5 * time.Second}
 var addressHeight = regexp.MustCompile(`^(.*\D)\s+(\d+)\s*$`)
+var streetPrefix = regexp.MustCompile(`^(avenida|av\.?|avda\.?|calle)\s+`)
+var placeSlots = make(chan struct{}, 8)
 
 type searchPlace struct {
 	Street   string  `json:"-"`
@@ -171,6 +173,14 @@ func handlePlaces(w http.ResponseWriter, r *http.Request) {
 		w.Write(cached.body)
 		return
 	}
+	select {
+	case placeSlots <- struct{}{}:
+		defer func() { <-placeSlots }()
+	default:
+		w.Header().Set("Retry-After", "2")
+		http.Error(w, "Buscador ocupado", 503)
+		return
+	}
 	ctx, cancel := context.WithTimeout(r.Context(), 12*time.Second)
 	defer cancel()
 	height, street := "", query
@@ -191,7 +201,7 @@ func handlePlaces(w http.ResponseWriter, r *http.Request) {
 		georef <- result{[]searchPlace{}, nil}
 	}
 	p, g := <-photon, <-georef
-	if p.err != nil && g.err != nil {
+	if p.err != nil && (height == "" || g.err != nil) {
 		http.Error(w, "Buscador no disponible", 502)
 		return
 	}
@@ -224,10 +234,22 @@ func handlePlaces(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	places := append(g.places, p.places...)
+	// Do not store a temporary provider outage as a valid empty search.
+	if len(places) == 0 && (p.err != nil || g.err != nil) {
+		http.Error(w, "Buscador no disponible", 502)
+		return
+	}
 	body, _ := json.Marshal(map[string]interface{}{"places": places, "source": "Georef + Photon / OpenStreetMap"})
 	placeCache.Lock()
 	if len(placeCache.entries) >= 256 {
-		placeCache.entries = make(map[string]placeCacheEntry)
+		var oldest string
+		var expiry time.Time
+		for key, entry := range placeCache.entries {
+			if expiry.IsZero() || entry.expires.Before(expiry) {
+				oldest, expiry = key, entry.expires
+			}
+		}
+		delete(placeCache.entries, oldest)
 	}
 	placeCache.entries[query] = placeCacheEntry{body, time.Now().Add(15 * time.Minute)}
 	placeCache.Unlock()

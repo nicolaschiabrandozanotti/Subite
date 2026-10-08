@@ -3,8 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"hash/fnv"
 	"io"
 	"log"
+	"math"
 	"net/http"
 	"net/url"
 	"strings"
@@ -15,17 +17,24 @@ import (
 const (
 	baseURL   = "https://micronauta4.dnsalias.net"
 	userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
-	port      = ":3001"
 )
 
 type BondiServer struct {
-	mu           sync.RWMutex
-	client       *http.Client
-	cookie       string
-	cookieExpiry time.Time
-	lineasCache  []byte
-	lineasTime   time.Time
-	trazaCache   map[string][]byte
+	mu              sync.RWMutex
+	client          *http.Client
+	cookie          string
+	cookieExpiry    time.Time
+	lineasCache     []byte
+	lineasTime      time.Time
+	trazaCache      map[string]arrivalCacheEntry
+	lineasLoad      sync.Mutex
+	trazaLoad       [16]sync.Mutex
+	sessionLoad     sync.Mutex
+	upstreamSlots   chan struct{}
+	arrivalsMu      sync.Mutex
+	arrivalsCache   map[string]arrivalCacheEntry
+	arrivalsFlights map[string]*arrivalFlight
+	arrivalsSlots   chan struct{}
 }
 
 func NewBondiServer() *BondiServer {
@@ -33,19 +42,27 @@ func NewBondiServer() *BondiServer {
 		client: &http.Client{
 			Timeout: 10 * time.Second,
 		},
-		trazaCache: make(map[string][]byte),
+		trazaCache:      make(map[string]arrivalCacheEntry),
+		upstreamSlots:   make(chan struct{}, 16),
+		arrivalsCache:   make(map[string]arrivalCacheEntry),
+		arrivalsFlights: make(map[string]*arrivalFlight),
+		arrivalsSlots:   make(chan struct{}, 8),
 	}
 }
 
 // Ensure active session with micronauta backend
 func (s *BondiServer) ensureSession() (string, error) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
+	s.sessionLoad.Lock()
+	defer s.sessionLoad.Unlock()
 
 	now := time.Now()
+	s.mu.RLock()
 	if s.cookie != "" && now.Before(s.cookieExpiry) {
-		return s.cookie, nil
+		cookie := s.cookie
+		s.mu.RUnlock()
+		return cookie, nil
 	}
+	s.mu.RUnlock()
 
 	log.Println("🔄 [Go Server] Inicializando nueva sesión con el servidor municipal...")
 	req, err := http.NewRequest("GET", baseURL+"/usuario/urbano.php?conf=cbaciudad", nil)
@@ -59,21 +76,37 @@ func (s *BondiServer) ensureSession() (string, error) {
 		return "", err
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return "", fmt.Errorf("session status %d", resp.StatusCode)
+	}
 
 	for _, c := range resp.Cookies() {
 		if c.Name == "PHPSESSID" {
+			s.mu.Lock()
 			s.cookie = fmt.Sprintf("PHPSESSID=%s", c.Value)
 			s.cookieExpiry = now.Add(20 * time.Minute)
-			log.Printf("✅ [Go Server] Sesión establecida: %s...", c.Value[:8])
-			return s.cookie, nil
+			cookie := s.cookie
+			s.mu.Unlock()
+			log.Print("Sesión del servicio de transporte establecida")
+			return cookie, nil
 		}
 	}
 
-	return s.cookie, nil
+	return "", fmt.Errorf("session cookie missing")
 }
 
 // Request to TuBondi backend with auto-retry on 408
 func (s *BondiServer) makeRequest(endpoint string, bodyParams url.Values, isGet bool) ([]byte, error) {
+	select {
+	case s.upstreamSlots <- struct{}{}:
+	default:
+		return nil, errArrivalsBusy
+	}
+	defer func() { <-s.upstreamSlots }()
+	return s.makeRequestAttempt(endpoint, bodyParams, isGet, true)
+}
+
+func (s *BondiServer) makeRequestAttempt(endpoint string, bodyParams url.Values, isGet, retry bool) ([]byte, error) {
 	cookie, err := s.ensureSession()
 	if err != nil {
 		return nil, err
@@ -105,25 +138,42 @@ func (s *BondiServer) makeRequest(endpoint string, bodyParams url.Values, isGet 
 	defer resp.Body.Close()
 
 	if resp.StatusCode == 408 {
+		if !retry {
+			return nil, fmt.Errorf("upstream session unavailable")
+		}
 		log.Println("⚠️ [Go Server] Sesión expirada (408). Renovando sesión...")
 		s.mu.Lock()
-		s.cookie = ""
+		if s.cookie == cookie {
+			s.cookie = ""
+		}
 		s.mu.Unlock()
-		s.ensureSession()
-		return s.makeRequest(endpoint, bodyParams, isGet)
+		resp.Body.Close()
+		return s.makeRequestAttempt(endpoint, bodyParams, isGet, false)
+	}
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return nil, fmt.Errorf("upstream status %d", resp.StatusCode)
 	}
 
-	return io.ReadAll(resp.Body)
+	raw, err := io.ReadAll(io.LimitReader(resp.Body, 8*1024*1024+1))
+	if len(raw) > 8*1024*1024 {
+		return nil, fmt.Errorf("upstream response too large")
+	}
+	return raw, err
 }
 
 // Middleware CORS
 func enableCORS(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 		if r.Method == "OPTIONS" {
 			w.WriteHeader(http.StatusOK)
+			return
+		}
+		if r.Method != http.MethodGet {
+			w.Header().Set("Allow", "GET, OPTIONS")
+			http.Error(w, "GET required", 405)
 			return
 		}
 		next(w, r)
@@ -132,6 +182,8 @@ func enableCORS(next http.HandlerFunc) http.HandlerFunc {
 
 // Handler: /api/lineas
 func (s *BondiServer) handleLineas(w http.ResponseWriter, r *http.Request) {
+	s.lineasLoad.Lock()
+	defer s.lineasLoad.Unlock()
 	s.mu.RLock()
 	if len(s.lineasCache) > 0 && time.Since(s.lineasTime) < 30*time.Minute {
 		cached := s.lineasCache
@@ -172,7 +224,7 @@ func (s *BondiServer) handleLineas(w http.ResponseWriter, r *http.Request) {
 		} `json:"clientes"`
 	}
 
-	if err := json.Unmarshal(raw, &original); err == nil {
+	if err := json.Unmarshal(raw, &original); err == nil && len(original.Lineas) > 0 {
 		clientMap := make(map[int]string)
 		for _, c := range original.Clientes {
 			clientMap[c.ID] = c.Nombre
@@ -196,8 +248,14 @@ func (s *BondiServer) handleLineas(w http.ResponseWriter, r *http.Request) {
 
 		cleanLines := make([]CleanLinea, 0, len(original.Lineas))
 		for _, l := range original.Lineas {
+			if l.LineaID == "" || l.LineaNombre == "" {
+				continue
+			}
 			rutas := make([]CleanRuta, 0, len(l.Rutas))
 			for _, r := range l.Rutas {
+				if r.RutaID == "" {
+					continue
+				}
 				rutas = append(rutas, CleanRuta{
 					ID:       r.RutaID,
 					Sentido:  r.Sentido,
@@ -216,6 +274,10 @@ func (s *BondiServer) handleLineas(w http.ResponseWriter, r *http.Request) {
 			})
 		}
 
+		if len(cleanLines) == 0 {
+			http.Error(w, "Lines unavailable", http.StatusBadGateway)
+			return
+		}
 		result := map[string]interface{}{
 			"lineas":    cleanLines,
 			"empresas":  original.Clientes,
@@ -234,8 +296,7 @@ func (s *BondiServer) handleLineas(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(raw)
+	http.Error(w, "Lines unavailable", http.StatusBadGateway)
 }
 
 // Handler: /api/coches
@@ -245,7 +306,7 @@ func (s *BondiServer) handleCoches(w http.ResponseWriter, r *http.Request) {
 	cliente := q.Get("cliente")
 	linea := q.Get("linea")
 
-	if ruta == "" {
+	if ruta == "" || len(ruta) > 100 || len(cliente) > 100 || len(linea) > 100 {
 		http.Error(w, "Parametro ruta requerido", http.StatusBadRequest)
 		return
 	}
@@ -278,7 +339,7 @@ func (s *BondiServer) handleCoches(w http.ResponseWriter, r *http.Request) {
 		} `json:"coches"`
 	}
 
-	if err := json.Unmarshal(raw, &parsed); err == nil {
+	if err := json.Unmarshal(raw, &parsed); err == nil && parsed.Coches != nil {
 		type CleanCoche struct {
 			Coche     int     `json:"coche"`
 			Linea     string  `json:"linea"`
@@ -293,6 +354,9 @@ func (s *BondiServer) handleCoches(w http.ResponseWriter, r *http.Request) {
 
 		resCoches := make([]CleanCoche, 0, len(parsed.Coches))
 		for _, c := range parsed.Coches {
+			if c.Coche <= 0 || !validCoordinate(c.Lat, c.Lon) {
+				continue
+			}
 			l := c.Linea
 			if l == "" {
 				l = linea
@@ -321,8 +385,7 @@ func (s *BondiServer) handleCoches(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(raw)
+	http.Error(w, "Vehicles unavailable", http.StatusBadGateway)
 }
 
 // Handler: /api/traza
@@ -331,13 +394,21 @@ func (s *BondiServer) handleTraza(w http.ResponseWriter, r *http.Request) {
 	linea := q.Get("linea")
 	ruta := q.Get("ruta")
 	cliente := q.Get("cliente")
-
-	cacheKey := fmt.Sprintf("%s_%s_%s", linea, ruta, cliente)
+	if linea == "" || ruta == "" || cliente == "" || len(linea) > 100 || len(ruta) > 100 || len(cliente) > 100 {
+		http.Error(w, "Invalid route", http.StatusBadRequest)
+		return
+	}
+	cacheKey := url.Values{"linea": {linea}, "ruta": {ruta}, "cliente": {cliente}}.Encode()
+	hash := fnv.New32a()
+	hash.Write([]byte(cacheKey))
+	load := &s.trazaLoad[hash.Sum32()%uint32(len(s.trazaLoad))]
+	load.Lock()
+	defer load.Unlock()
 	s.mu.RLock()
-	if cached, ok := s.trazaCache[cacheKey]; ok {
+	if cached, ok := s.trazaCache[cacheKey]; ok && time.Now().Before(cached.expires) {
 		s.mu.RUnlock()
 		w.Header().Set("Content-Type", "application/json")
-		w.Write(cached)
+		w.Write(cached.data)
 		return
 	}
 	s.mu.RUnlock()
@@ -361,7 +432,7 @@ func (s *BondiServer) handleTraza(w http.ResponseWriter, r *http.Request) {
 		} `json:"paradas"`
 	}
 
-	if err := json.Unmarshal(raw, &parsed); err == nil {
+	if err := json.Unmarshal(raw, &parsed); err == nil && len(parsed.Traza) > 0 && len(parsed.Indicaciones) > 0 {
 		type Parada struct {
 			Codigo string  `json:"codigo"`
 			Nombre string  `json:"nombre"`
@@ -371,7 +442,7 @@ func (s *BondiServer) handleTraza(w http.ResponseWriter, r *http.Request) {
 
 		puntos := make([][]float64, 0, len(parsed.Traza))
 		for _, pt := range parsed.Traza {
-			if len(pt) >= 2 {
+			if len(pt) >= 2 && validCoordinate(pt[1], pt[0]) {
 				// Convert to [lat, lon]
 				puntos = append(puntos, []float64{pt[1], pt[0]})
 			}
@@ -379,6 +450,9 @@ func (s *BondiServer) handleTraza(w http.ResponseWriter, r *http.Request) {
 
 		paradas := make([]Parada, 0, len(parsed.Indicaciones))
 		for _, ind := range parsed.Indicaciones {
+			if ind.Codigo == "" || !validCoordinate(float64(ind.Lat), float64(ind.Lon)) {
+				continue
+			}
 			paradas = append(paradas, Parada{
 				Codigo: ind.Codigo,
 				Nombre: ind.Nombre,
@@ -387,6 +461,10 @@ func (s *BondiServer) handleTraza(w http.ResponseWriter, r *http.Request) {
 			})
 		}
 
+		if len(puntos) == 0 || len(paradas) == 0 {
+			http.Error(w, "Route unavailable", http.StatusBadGateway)
+			return
+		}
 		res := map[string]interface{}{
 			"lineaId": linea,
 			"rutaId":  ruta,
@@ -397,7 +475,7 @@ func (s *BondiServer) handleTraza(w http.ResponseWriter, r *http.Request) {
 
 		out, _ := json.Marshal(res)
 		s.mu.Lock()
-		s.trazaCache[cacheKey] = out
+		storeResponse(s.trazaCache, cacheKey, out, 24*time.Hour, 16*1024*1024)
 		s.mu.Unlock()
 
 		w.Header().Set("Content-Type", "application/json")
@@ -405,29 +483,25 @@ func (s *BondiServer) handleTraza(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(raw)
+	http.Error(w, "Route unavailable", http.StatusBadGateway)
 }
 
-func main() {
-	server := NewBondiServer()
-	http.HandleFunc("/api/places", enableCORS(handlePlaces))
+func validCoordinate(lat, lon float64) bool {
+	return !math.IsNaN(lat) && !math.IsNaN(lon) && !math.IsInf(lat, 0) && !math.IsInf(lon, 0) && lat != 0 && lon != 0 && math.Abs(lat) <= 90 && math.Abs(lon) <= 180
+}
 
-	http.HandleFunc("/api/lineas", enableCORS(server.handleLineas))
-	http.HandleFunc("/api/coches", enableCORS(server.handleCoches))
-	http.HandleFunc("/api/traza", enableCORS(server.handleTraza))
-	http.HandleFunc("/api/arrivals", enableCORS(server.handleArrivals))
-	http.HandleFunc("/api/health", enableCORS(func(w http.ResponseWriter, r *http.Request) {
+func newHandler(server *BondiServer) http.Handler {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/api/places", enableCORS(handlePlaces))
+
+	mux.HandleFunc("/api/lineas", enableCORS(server.handleLineas))
+	mux.HandleFunc("/api/coches", enableCORS(server.handleCoches))
+	mux.HandleFunc("/api/traza", enableCORS(server.handleTraza))
+	mux.HandleFunc("/api/arrivals", enableCORS(server.handleArrivals))
+	mux.HandleFunc("/api/health", enableCORS(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(`{"status":"ok","engine":"golang"}`))
+		w.Write([]byte(`{"status":"ok","engine":"golang","version":"1.0.4"}`))
 	}))
 
-	// Serve built client if present
-	fs := http.FileServer(http.Dir("./client/dist"))
-	http.Handle("/", fs)
-
-	log.Printf("🚀 [Go Server] Servidor de alto rendimiento corriendo en http://localhost%s\n", port)
-	if err := http.ListenAndServe(port, nil); err != nil {
-		log.Fatalf("Error arrancando servidor: %v", err)
-	}
+	return compressCatalogs(mux)
 }

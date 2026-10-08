@@ -17,6 +17,8 @@ go run .
 
 Escucha en el puerto 3001. Los datos de transporte dependen del servicio externo y pueden no estar disponibles para todas las líneas.
 
+Para publicar el backend con HTTPS y conectar la APK, ver [DEPLOYMENT.md](DEPLOYMENT.md).
+
 App:
 
 ```sh
