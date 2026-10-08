@@ -88,7 +88,13 @@ void main() {
     });
     await tester.pumpWidget(const BondiApp());
     await tester.pumpAndSettle();
+    // A saved offline trip is now opened from the map's quick actions;
+    // the details sheet stays hidden until a trip is selected.
     final handle = find.byKey(const ValueKey('journey-sheet-handle'));
+    expect(handle, findsNothing);
+    await tester.tap(find.text('Abrir viaje sin datos'));
+    await tester.pumpAndSettle();
+    expect(handle, findsOneWidget);
     final before = tester.getCenter(handle);
     final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await mouse.addPointer(location: before);

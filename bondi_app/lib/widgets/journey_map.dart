@@ -60,10 +60,11 @@ class _JourneyMapState extends State<JourneyMap> {
     }
     _polylineKey = key;
     return _cachedPolylines = [
-      for (final route in routes) ...[
-        Polyline(points: route.$1, strokeWidth: 7, color: Colors.white),
-        Polyline(points: route.$1, strokeWidth: 4, color: route.$2),
-      ],
+      for (final route in routes)
+        if (route.$1.length >= 2) ...[
+          Polyline(points: route.$1, strokeWidth: 7, color: Colors.white),
+          Polyline(points: route.$1, strokeWidth: 4, color: route.$2),
+        ],
       if (widget.journey.pickup != null)
         Polyline(
           points: [widget.journey.origin, widget.journey.pickup!.position],

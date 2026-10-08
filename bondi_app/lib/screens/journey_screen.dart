@@ -618,6 +618,15 @@ class _JourneyScreenState extends State<JourneyScreen>
       ..._journey.visibleBuses.map((bus) => bus.position),
     ];
     if (points.length < 2) return;
+    // A zero-area route produces an infinite camera zoom in flutter_map.
+    // This can happen with a saved trip whose stops share coordinates.
+    if (points.every(
+      (point) =>
+          point.latitude == points.first.latitude &&
+          point.longitude == points.first.longitude,
+    )) {
+      return;
+    }
     _map.fitCamera(
       CameraFit.bounds(
         bounds: LatLngBounds.fromPoints(points),
@@ -658,35 +667,56 @@ class _JourneyScreenState extends State<JourneyScreen>
                     child: LayoutBuilder(
                       builder: (ctx, bounds) => ListView.separated(
                         scrollDirection: Axis.horizontal,
-                        itemCount: _journeys.isEmpty ? 1 : _journeys.length,
+                        itemCount:
+                            (_journeys.isEmpty ? 1 : _journeys.length) +
+                            (_journey.preparedTrip != null && !_journey.offline
+                                ? 1
+                                : 0),
                         separatorBuilder: (_, _) => const SizedBox(width: 8),
-                        itemBuilder: (_, i) => SizedBox(
-                          width: (bounds.maxWidth - 8) / 2,
-                          child: OutlinedButton.icon(
-                            onPressed: _journeys.isEmpty
-                                ? _manageJourneys
-                                : () =>
-                                      _useJourney(_journeys[i], origin: false),
-                            icon: Icon(
-                              _journeys.isEmpty
-                                  ? Icons.add
-                                  : Icons.bookmark_outline,
-                              size: 16,
-                            ),
-                            label: Text(
-                              _journeys.isEmpty
-                                  ? 'Crear viaje'
-                                  : _journeys[i].name,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            style: OutlinedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
+                        itemBuilder: (_, i) {
+                          final savedCount = _journeys.isEmpty
+                              ? 1
+                              : _journeys.length;
+                          final isOfflineShortcut =
+                              _journey.preparedTrip != null &&
+                              !_journey.offline &&
+                              i == savedCount;
+                          return SizedBox(
+                            width: (bounds.maxWidth - 8) / 2,
+                            child: OutlinedButton.icon(
+                              onPressed: isOfflineShortcut
+                                  ? _openOffline
+                                  : _journeys.isEmpty
+                                  ? _manageJourneys
+                                  : () => _useJourney(
+                                      _journeys[i],
+                                      origin: false,
+                                    ),
+                              icon: Icon(
+                                isOfflineShortcut
+                                    ? Icons.offline_pin_outlined
+                                    : _journeys.isEmpty
+                                    ? Icons.add
+                                    : Icons.bookmark_outline,
+                                size: 16,
+                              ),
+                              label: Text(
+                                isOfflineShortcut
+                                    ? 'Abrir viaje sin datos'
+                                    : _journeys.isEmpty
+                                    ? 'Crear viaje'
+                                    : _journeys[i].name,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              style: OutlinedButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                ),
                               ),
                             ),
-                          ),
-                        ),
+                          );
+                        },
                       ),
                     ),
                   ),
@@ -752,10 +782,7 @@ class _JourneyScreenState extends State<JourneyScreen>
                   ),
                 ),
               ),
-            if (_journey.planned ||
-                _journey.line != null ||
-                _journey.offline ||
-                _journey.preparedTrip != null)
+            if (_journey.planned || _journey.line != null || _journey.offline)
               DraggableScrollableSheet(
                 controller: _sheet,
                 initialChildSize: .30,
@@ -823,20 +850,6 @@ class _JourneyScreenState extends State<JourneyScreen>
                         ),
                       ),
                       const SizedBox(height: 15),
-                      if (!_journey.inTrip &&
-                          _journey.preparedTrip != null &&
-                          !_journey.offline)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: SizedBox(
-                            width: double.infinity,
-                            child: OutlinedButton.icon(
-                              onPressed: _openOffline,
-                              icon: const Icon(Icons.offline_pin_outlined),
-                              label: const Text('Abrir viaje sin datos'),
-                            ),
-                          ),
-                        ),
                       JourneyResultsPanel(
                         journey: _journey,
                         position: _lastPosition,
