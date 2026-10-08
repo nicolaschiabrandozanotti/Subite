@@ -2076,10 +2076,11 @@ class _JourneyScreenState extends State<JourneyScreen>
     }
     _polylineKey = key;
     return _cachedPolylines = [
-      for (final route in routes) ...[
-        Polyline(points: route.$1, strokeWidth: 7, color: Colors.white),
-        Polyline(points: route.$1, strokeWidth: 4, color: route.$2),
-      ],
+      for (final route in routes)
+        if (route.$1.length >= 2) ...[
+          Polyline(points: route.$1, strokeWidth: 7, color: Colors.white),
+          Polyline(points: route.$1, strokeWidth: 4, color: route.$2),
+        ],
       if (_pickup != null)
         Polyline(
           points: [_origin, _pickup!.position],
@@ -2103,6 +2104,13 @@ class _JourneyScreenState extends State<JourneyScreen>
       ..._visibleBuses().map((bus) => bus.position),
     ];
     if (points.length < 2) return;
+    // A zero-area route produces an infinite camera zoom in flutter_map.
+    // This can happen with a saved trip whose stops share coordinates.
+    if (points.every(
+      (point) =>
+          point.latitude == points.first.latitude &&
+          point.longitude == points.first.longitude,
+    )) return;
     _map.fitCamera(
       CameraFit.bounds(
         bounds: LatLngBounds.fromPoints(points),
