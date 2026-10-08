@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420" role="img" aria-labelledby="title description">
+  <title id="title">Subite — Tu ciudad, tu recorrido, tu tiempo</title>
+  <desc id="description">Gráfica azul nocturna con una ilustración vectorial de un colectivo, paradas y recorrido urbano.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#081321"/><stop offset=".58" stop-color="#112742"/><stop offset="1" stop-color="#163D60"/></linearGradient>
+    <radialGradient id="glow"><stop offset="0" stop-color="#5BB8FE" stop-opacity=".35"/><stop offset="1" stop-color="#5BB8FE" stop-opacity="0"/></radialGradient>
+    <linearGradient id="bus" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#FFFFFF"/><stop offset="1" stop-color="#D9EDFF"/></linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#5BB8FE"/><stop offset="1" stop-color="#88E5FF"/></linearGradient>
+    <pattern id="dots" width="27" height="27" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="#AECDEB" opacity=".13"/></pattern>
+  </defs>
+  <rect width="1200" height="420" rx="25" fill="url(#bg)"/>
+  <rect width="1200" height="420" rx="25" fill="url(#dots)"/>
+  <circle cx="988" cy="125" r="285" fill="url(#glow)"/>
+  <path d="M0 364H1200" stroke="#7EBCE8" opacity=".18"/>
+  <g fill="#2D5777" opacity=".39">
+    <path d="M560 363v-66h35v-38h26v104zm73 0v-90h21v-31h30v121zm63 0v-115h33v115zm49 0v-74h38v74zm63 0v-144h29v144zm57 0v-91h34v91zm64 0v-134h40v134zm71 0v-81h22v81zm54 0v-109h32v109zm52 0v-64h40v64z"/>
+  </g>
+  <g opacity=".65" fill="#89B4D3">
+    <rect x="649" y="289" width="4" height="5" rx="1"/><rect x="664" y="289" width="4" height="5" rx="1"/>
+    <rect x="823" y="243" width="4" height="5" rx="1"/><rect x="823" y="257" width="4" height="5" rx="1"/>
+    <rect x="966" y="247" width="4" height="5" rx="1"/><rect x="981" y="247" width="4" height="5" rx="1"/>
+    <rect x="1056" y="272" width="4" height="5" rx="1"/>
+  </g>
+  <g font-family="Inter, Segoe UI, Arial, sans-serif">
+    <rect x="64" y="58" width="172" height="31" rx="15.5" fill="#173D59" stroke="#4C7799" stroke-opacity=".5"/>
+    <circle cx="84" cy="73.5" r="4" fill="#54DEAC"/>
+    <text x="98" y="79" font-size="13" font-weight="700" fill="#CFE6FA" letter-spacing="1.8">CÓRDOBA · ARG</text>
+    <text x="60" y="209" fill="#FFFFFF" font-size="105" font-weight="850" letter-spacing="-5">subite<tspan fill="#69C9FF">.</tspan></text>
+    <text x="65" y="261" fill="#C4D9EF" font-size="27" font-weight="450">Tu ciudad. Tu recorrido. Tu tiempo.</text>
+    <text x="65" y="315" fill="#91AEC7" font-size="18">Movete con información, no con dudas.</text>
+  </g>
+  <path d="M697 97C764 20 916 44 955 115S1120 165 1160 81" fill="none" stroke="#56C9FE" stroke-width="7" stroke-linecap="round" opacity=".48"/>
+  <path d="M697 97C764 20 916 44 955 115S1120 165 1160 81" fill="none" stroke="#B6EEFF" stroke-width="2" stroke-dasharray="1 16" stroke-linecap="round" opacity=".95"/>
+  <circle cx="697" cy="97" r="12" fill="#081B2D" stroke="#70D6FD" stroke-width="5"/>
+  <circle cx="955" cy="115" r="10" fill="#081B2D" stroke="#70D6FD" stroke-width="5"/>
+  <circle cx="1160" cy="81" r="12" fill="#54DEAC" stroke="#C3FFDE" stroke-width="4"/>
+  <g transform="translate(739 163)">
+    <rect x="17" y="16" width="352" height="163" rx="31" fill="#001020" opacity=".26"/>
+    <rect x="0" y="0" width="352" height="163" rx="31" fill="url(#bus)"/>
+    <rect x="17" y="18" width="318" height="75" rx="17" fill="#173B5B"/>
+    <rect x="32" y="31" width="70" height="49" rx="8" fill="#3A82AE"/>
+    <rect x="111" y="31" width="70" height="49" rx="8" fill="#3A82AE"/>
+    <rect x="190" y="31" width="70" height="49" rx="8" fill="#3A82AE"/>
+    <path d="M270 31H318Q325 31 325 40V80H270Z" fill="#3A82AE"/>
+    <path d="M16 106H336" stroke="#79A2BD" opacity=".45" stroke-width="2"/>
+    <path d="M0 112H352V132Q352 163 322 163H30Q0 163 0 133Z" fill="#0872AE"/>
+    <rect x="25" y="126" width="58" height="7" rx="3.5" fill="#BDEEFF" opacity=".75"/>
+    <rect x="272" y="126" width="54" height="7" rx="3.5" fill="#BDEEFF" opacity=".75"/>
+    <circle cx="75" cy="160" r="27" fill="#071526"/><circle cx="75" cy="160" r="13" fill="#AFCDE3"/>
+    <circle cx="274" cy="160" r="27" fill="#071526"/><circle cx="274" cy="160" r="13" fill="#AFCDE3"/>
+    <path d="M151 52h57" stroke="#D3EEFF" stroke-width="5" stroke-linecap="round" opacity=".7"/>
+    <rect x="293" y="101" width="40" height="13" rx="6" fill="#C0F4FA"/>
+    <rect x="14" y="101" width="33" height="13" rx="6" fill="#F8CF73"/>
+  </g>
+  <path d="M743 369h393" stroke="#7FC9EA" stroke-width="5" stroke-linecap="round" opacity=".4"/>
+  <rect x=".5" y=".5" width="1199" height="419" rx="24.5" stroke="#8AB9DF" stroke-opacity=".18" fill="none"/>
+</svg>

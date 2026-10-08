@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 255" role="img" aria-labelledby="title description">
+  <title id="title">Del origen al destino</title>
+  <desc id="description">Ilustración de un recorrido de colectivo con un punto de salida, una línea y un destino.</desc>
+  <defs>
+    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#102742"/><stop offset="1" stop-color="#0A1729"/></linearGradient>
+    <linearGradient id="line" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#54B5FF"/><stop offset="1" stop-color="#58DFB1"/></linearGradient>
+  </defs>
+  <rect width="1100" height="255" rx="24" fill="url(#panel)"/>
+  <g opacity=".11" fill="none" stroke="#C1E7FF" stroke-width="2">
+    <path d="M15 208C170 134 240 252 406 169S678 88 880 150s174-44 220-89"/>
+    <path d="M70 41c80 76 196 17 313 85s188 26 268-20 183-58 311 0"/>
+    <path d="M350 0v255M715 0v255"/>
+  </g>
+  <g font-family="Inter, Segoe UI, Arial, sans-serif">
+    <text x="42" y="48" font-weight="700" font-size="14" letter-spacing="2.4" fill="#8BC7F1">UN VIAJE MÁS SIMPLE</text>
+    <path d="M132 136H960" fill="none" stroke="#274967" stroke-width="16" stroke-linecap="round"/>
+    <path d="M132 136C250 136 242 94 355 94S513 174 625 174s152-38 335-38" fill="none" stroke="url(#line)" stroke-width="9" stroke-linecap="round"/>
+    <circle cx="132" cy="136" r="23" fill="#102742" stroke="#77D0FF" stroke-width="8"/>
+    <circle cx="625" cy="174" r="17" fill="#102742" stroke="#7EDCFF" stroke-width="6"/>
+    <circle cx="960" cy="136" r="23" fill="#0F3B35" stroke="#68EBBE" stroke-width="8"/>
+    <g transform="translate(428 87)">
+      <rect x="0" y="0" width="100" height="64" rx="17" fill="#F0F8FF"/>
+      <rect x="11" y="11" width="78" height="24" rx="6" fill="#28618D"/>
+      <rect x="11" y="39" width="78" height="10" rx="5" fill="#1486B7"/>
+      <circle cx="22" cy="62" r="11" fill="#061B30"/><circle cx="77" cy="62" r="11" fill="#061B30"/>
+      <circle cx="22" cy="62" r="5" fill="#CEE9FF"/><circle cx="77" cy="62" r="5" fill="#CEE9FF"/>
+    </g>
+    <text x="132" y="201" text-anchor="middle" font-size="18" fill="#F0F7FF" font-weight="700">Origen</text>
+    <text x="625" y="224" text-anchor="middle" font-size="17" fill="#B7D4EA" font-weight="600">Tu recorrido</text>
+    <text x="960" y="201" text-anchor="middle" font-size="18" fill="#F0F7FF" font-weight="700">Destino</text>
+    <text x="1018" y="47" text-anchor="end" font-size="12" fill="#7398B8">ILUSTRACIÓN</text>
+  </g>
+  <rect x=".5" y=".5" width="1099" height="254" rx="23.5" fill="none" stroke="#8AB9DF" stroke-opacity=".18"/>
+</svg>
