@@ -139,8 +139,8 @@ class _OfflineMapLayerState extends State<OfflineMapLayer> {
         }
         return Stack(
           children: [
-            PolygonLayer(polygons: parks),
-            PolylineLayer(polylines: roads),
+            PolygonLayer(polygons: parks, simplificationTolerance: 1.5),
+            PolylineLayer(polylines: roads, simplificationTolerance: 1.5),
             MarkerLayer(markers: labels),
           ],
         );
