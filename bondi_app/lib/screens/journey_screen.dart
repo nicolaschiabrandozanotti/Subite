@@ -23,6 +23,7 @@ import '../services/arrival_positions.dart';
 import '../services/route_position.dart';
 import '../services/predictive_engine.dart';
 import 'expenses_screen.dart';
+import 'support_sheet.dart';
 
 const blue = Color(0xFF006CA8);
 const ink = Color(0xFF182D46);
@@ -55,6 +56,7 @@ class _JourneyScreenState extends State<JourneyScreen>
   Parada? _dropoff;
   LatLng _origin = const LatLng(-31.4167, -64.1833);
   String _originName = 'Elegí tu punto de partida';
+  Position? _lastPosition;
   String? _picking;
   String _preference = 'nearest';
   bool _loading = true;
@@ -366,10 +368,12 @@ class _JourneyScreenState extends State<JourneyScreen>
       );
       if (!mounted) return;
       if (!changeOrigin) {
+        setState(() => _lastPosition = position);
         _map.move(LatLng(position.latitude, position.longitude), 15);
         return;
       }
       setState(() {
+        _lastPosition = position;
         _origin = LatLng(position.latitude, position.longitude);
         _originName = 'Mi ubicación actual';
       });
@@ -575,6 +579,7 @@ class _JourneyScreenState extends State<JourneyScreen>
   bool _alertAnnounced = false;
   void _alertChanged() {
     if (!mounted) return;
+    setState(() => _lastPosition = _alerts.lastPosition);
     if (_alerts.active) _alertAnnounced = false;
     if (_alerts.fired && !_alertAnnounced) {
       _alertAnnounced = true;
@@ -1391,10 +1396,7 @@ class _JourneyScreenState extends State<JourneyScreen>
             tilePadding: EdgeInsets.zero,
             title: const Text('Paradas hasta tu bajada'),
             subtitle: Text('${_tripStops().length} paradas en este tramo'),
-            children: [
-              for (final stop in _tripStops())
-                ListTile(dense: true, title: Text(stop.nombre)),
-            ],
+            children: [_stopTimeline()],
           ),
           ExpansionTile(
             tilePadding: EdgeInsets.zero,
@@ -2074,10 +2076,11 @@ class _JourneyScreenState extends State<JourneyScreen>
     }
     _polylineKey = key;
     return _cachedPolylines = [
-      for (final route in routes) ...[
-        Polyline(points: route.$1, strokeWidth: 7, color: Colors.white),
-        Polyline(points: route.$1, strokeWidth: 4, color: route.$2),
-      ],
+      for (final route in routes)
+        if (route.$1.length >= 2) ...[
+          Polyline(points: route.$1, strokeWidth: 7, color: Colors.white),
+          Polyline(points: route.$1, strokeWidth: 4, color: route.$2),
+        ],
       if (_pickup != null)
         Polyline(
           points: [_origin, _pickup!.position],
@@ -2101,6 +2104,13 @@ class _JourneyScreenState extends State<JourneyScreen>
       ..._visibleBuses().map((bus) => bus.position),
     ];
     if (points.length < 2) return;
+    // A zero-area route produces an infinite camera zoom in flutter_map.
+    // This can happen with a saved trip whose stops share coordinates.
+    if (points.every(
+      (point) =>
+          point.latitude == points.first.latitude &&
+          point.longitude == points.first.longitude,
+    )) return;
     _map.fitCamera(
       CameraFit.bounds(
         bounds: LatLngBounds.fromPoints(points),
@@ -2321,35 +2331,54 @@ class _JourneyScreenState extends State<JourneyScreen>
                     child: LayoutBuilder(
                       builder: (ctx, bounds) => ListView.separated(
                         scrollDirection: Axis.horizontal,
-                        itemCount: _journeys.isEmpty ? 1 : _journeys.length,
+                        itemCount:
+                            (_journeys.isEmpty ? 1 : _journeys.length) +
+                            (_preparedTrip != null && !_offline ? 1 : 0),
                         separatorBuilder: (_, _) => const SizedBox(width: 8),
-                        itemBuilder: (_, i) => SizedBox(
-                          width: (bounds.maxWidth - 8) / 2,
-                          child: OutlinedButton.icon(
-                            onPressed: _journeys.isEmpty
-                                ? _manageJourneys
-                                : () =>
-                                      _useJourney(_journeys[i], origin: false),
-                            icon: Icon(
-                              _journeys.isEmpty
-                                  ? Icons.add
-                                  : Icons.bookmark_outline,
-                              size: 16,
-                            ),
-                            label: Text(
-                              _journeys.isEmpty
-                                  ? 'Crear viaje'
-                                  : _journeys[i].name,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            style: OutlinedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
+                        itemBuilder: (_, i) {
+                          final savedCount = _journeys.isEmpty
+                              ? 1
+                              : _journeys.length;
+                          final isOfflineShortcut =
+                              _preparedTrip != null &&
+                              !_offline &&
+                              i == savedCount;
+                          return SizedBox(
+                            width: (bounds.maxWidth - 8) / 2,
+                            child: OutlinedButton.icon(
+                              onPressed: isOfflineShortcut
+                                  ? _openOffline
+                                  : _journeys.isEmpty
+                                  ? _manageJourneys
+                                  : () => _useJourney(
+                                        _journeys[i],
+                                        origin: false,
+                                      ),
+                              icon: Icon(
+                                isOfflineShortcut
+                                    ? Icons.offline_pin_outlined
+                                    : _journeys.isEmpty
+                                    ? Icons.add
+                                    : Icons.bookmark_outline,
+                                size: 16,
+                              ),
+                              label: Text(
+                                isOfflineShortcut
+                                    ? 'Abrir viaje sin datos'
+                                    : _journeys.isEmpty
+                                    ? 'Crear viaje'
+                                    : _journeys[i].name,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              style: OutlinedButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                ),
                               ),
                             ),
-                          ),
-                        ),
+                          );
+                        },
                       ),
                     ),
                   ),
@@ -2378,6 +2407,20 @@ class _JourneyScreenState extends State<JourneyScreen>
                     tooltip: 'Ver recorrido',
                     child: const Icon(Icons.layers_outlined),
                   ),
+                  const SizedBox(height: 8),
+                  FloatingActionButton.small(
+                    heroTag: 'support',
+                    backgroundColor: Colors.white,
+                    foregroundColor: blue,
+                    tooltip: 'Bancá Subite',
+                    onPressed: () => showModalBottomSheet<void>(
+                      context: context,
+                      isScrollControlled: true,
+                      showDragHandle: true,
+                      builder: (_) => const SupportSheet(),
+                    ),
+                    child: const Icon(Icons.favorite_outline),
+                  ),
                 ],
               ),
             ),
@@ -2401,7 +2444,7 @@ class _JourneyScreenState extends State<JourneyScreen>
                   ),
                 ),
               ),
-            if (_planned || _line != null || _offline || _preparedTrip != null)
+            if (_planned || _line != null || _offline)
               DraggableScrollableSheet(
                 controller: _sheet,
                 initialChildSize: .30,
@@ -2701,6 +2744,159 @@ class _JourneyScreenState extends State<JourneyScreen>
     );
   }
 
+  Future<void> _swapEndpoints() async {
+    final destination = _destination;
+    if (destination == null || _originName == 'Elegí tu punto de partida') {
+      return;
+    }
+    await _alerts.stopWatching();
+    if (!mounted) return;
+    setState(() {
+      _destination = Parada(
+        codigo: 'origin',
+        nombre: _originName,
+        lat: _origin.latitude,
+        lon: _origin.longitude,
+      );
+      _origin = destination.position;
+      _originName = destination.nombre;
+      _picking = null;
+      _offline = false;
+      _tracked = null;
+    });
+    await _findJourneys();
+  }
+
+  Widget _stopTimeline() {
+    final stops = _tripStops();
+    final fix = _lastPosition;
+    final validFix =
+        fix != null &&
+        fix.accuracy <= 50 &&
+        DateTime.now().difference(fix.timestamp).inSeconds <= 30;
+    final progress = validFix && _trace != null
+        ? JourneyPlanner.progress(
+            LatLng(fix.latitude, fix.longitude),
+            _trace!.puntos,
+          )
+        : null;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Text(
+            progress == null
+                ? 'Activá el aviso de bajada para seguir tu avance.'
+                : 'Tu avance según tu ubicación',
+            style: const TextStyle(color: Colors.blueGrey, fontSize: 12),
+          ),
+        ),
+        for (var i = 0; i < stops.length; i++)
+          Builder(
+            builder: (context) {
+              final stop = stops[i];
+              final stopProgress = JourneyPlanner.progress(
+                stop.position,
+                _trace!.puntos,
+              );
+              final passed =
+                  progress != null &&
+                  stopProgress != null &&
+                  progress > stopProgress + 60;
+              final here =
+                  validFix &&
+                  const Distance()(
+                        LatLng(fix.latitude, fix.longitude),
+                        stop.position,
+                      ) <=
+                      60;
+              final color = here
+                  ? blue
+                  : passed
+                  ? Colors.blueGrey
+                  : blue;
+              final label = here
+                  ? 'Estás acá'
+                  : passed
+                  ? 'Ya pasaste'
+                  : i == 0
+                  ? 'Subís acá'
+                  : i == stops.length - 1
+                  ? 'Bajás acá'
+                  : null;
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: 40,
+                    height: 64,
+                    child: Stack(
+                      alignment: Alignment.topCenter,
+                      children: [
+                        if (i < stops.length - 1)
+                          Positioned(
+                            top: 22,
+                            bottom: 0,
+                            child: Container(
+                              width: 2,
+                              color: passed ? Colors.blueGrey.shade200 : pale,
+                            ),
+                          ),
+                        Container(
+                          width: 24,
+                          height: 24,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: here || passed ? color : Colors.white,
+                            border: Border.all(color: color, width: 2),
+                          ),
+                          child: Icon(
+                            here
+                                ? Icons.my_location
+                                : passed
+                                ? Icons.check
+                                : Icons.circle,
+                            size: here || passed ? 14 : 7,
+                            color: here || passed ? Colors.white : color,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 8, bottom: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            stop.nombre,
+                            style: TextStyle(
+                              color: passed ? Colors.blueGrey : ink,
+                              fontWeight:
+                                  here || i == 0 || i == stops.length - 1
+                                  ? FontWeight.w700
+                                  : FontWeight.w400,
+                            ),
+                          ),
+                          if (label != null)
+                            Text(
+                              label,
+                              style: TextStyle(color: color, fontSize: 12),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+      ],
+    );
+  }
+
   Widget _searchBar({required bool origin}) {
     final selected = origin
         ? _originName != 'Elegí tu punto de partida'
@@ -2758,10 +2954,15 @@ class _JourneyScreenState extends State<JourneyScreen>
             ),
           ),
           IconButton(
-            tooltip: origin ? 'Usar mi ubicación' : 'Preferencias del viaje',
-            onPressed: origin ? _locate : _findJourneys,
+            tooltip: origin ? 'Usar mi ubicación' : 'Invertir inicio y destino',
+            onPressed: origin
+                ? _locate
+                : (_destination != null &&
+                          _originName != 'Elegí tu punto de partida'
+                      ? _swapEndpoints
+                      : null),
             icon: Icon(
-              origin ? Icons.gps_fixed : Icons.tune,
+              origin ? Icons.gps_fixed : Icons.swap_vert,
               color: blue,
               size: 21,
             ),
