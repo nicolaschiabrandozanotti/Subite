@@ -20,7 +20,7 @@ Actualizado el 8 de octubre de 2026. La aplicación distribuida es Flutter para 
 | `lib/services/arrival_alert.dart` y `trip_alert_service.dart` | Seguimiento y emisión de avisos. |
 | `lib/services/api_service.dart` | HTTP y caché del catálogo y trazas; no decide el modo del viaje. |
 | `lib/services/offline_trip.dart` y `predictive_engine.dart` | Persistencia y avance estimado desde la referencia guardada. |
-| Mapa local en `lib/services/`, `lib/widgets/` y `assets/maps/` | Lectura y dibujo del dataset de Córdoba. |
+| Mapa local en `lib/services/`, `lib/widgets/` y `assets/maps/` | Lectura de un paquete de imágenes de Córdoba generado en la PC. |
 | `lib/theme/app_theme.dart` | Tema y colores compartidos. |
 
 La pantalla llama acciones del controlador y observa sus cambios; los widgets no modifican sus campos. El controlador no conoce BuildContext, navegación, cámara, diálogos ni permisos. Las consultas y el reloj pueden proporcionarse en las pruebas, sin clases que sólo deleguen.
@@ -70,3 +70,11 @@ gitnexus analyze --index-only --workers 2
 ```
 
 La resolución de llamadas es parcial. Una relación ausente no prueba que el código esté sin uso; comprobar también las referencias en fuentes, manejadores registrados y pruebas.
+
+## Mapa raster de prueba
+
+`tool/render_offline_map.py` genera las imágenes a partir del dataset OSM local.
+`services/raster_map.dart` lee su índice y entrega imágenes a FlutterMap.
+`widgets/offline_map_layer.dart` presenta esa capa tanto conectado como sin datos.
+El recorrido y los colectivos se dibujan encima. El paquete se incluye en la APK;
+la descarga/actualización separada todavía queda pendiente. Zoom nativo 10–16.

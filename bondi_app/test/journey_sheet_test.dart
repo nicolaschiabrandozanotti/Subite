@@ -8,12 +8,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bondi_app/main.dart';
 import 'package:bondi_app/widgets/bus_marker.dart';
 import 'package:bondi_app/widgets/offline_map_layer.dart';
+import 'package:bondi_app/services/raster_map.dart';
 import 'package:flutter_map/flutter_map.dart';
 
 void main() {
-  testWidgets('Offline trip renders its saved bus without street tiles', (
+  testWidgets('Offline trip renders its saved bus over packaged map tiles', (
     tester,
   ) async {
+    await tester.runAsync(RasterMap.load);
     final point = {'codigo': 'a', 'nombre': 'Casa', 'lat': -31.4, 'lon': -64.2};
     final end = {
       'codigo': 'b',
@@ -44,13 +46,19 @@ void main() {
       }),
     });
     await tester.pumpWidget(const BondiApp());
+    await tester.runAsync(() async {
+      await Future<void>.delayed(Duration.zero);
+    });
     await tester.pumpAndSettle();
     final open = find.text('Abrir viaje sin datos');
     expect(open.hitTestable(), findsOneWidget);
     await tester.tap(open);
     await tester.pumpAndSettle();
     expect(find.byType(BusMarker), findsWidgets);
-    expect(find.byType(TileLayer), findsNothing);
+    expect(
+      tester.widget<TileLayer>(find.byType(TileLayer)).tileProvider,
+      isA<RasterMap>(),
+    );
     expect(find.byType(OfflineMapLayer), findsOneWidget);
     expect(find.textContaining('no son en vivo'), findsOneWidget);
     expect(find.text('COLECTIVOS DEL RECORRIDO'), findsNothing);

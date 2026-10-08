@@ -1,97 +1,80 @@
 import 'dart:io';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:bondi_app/services/offline_basemap.dart';
+import 'package:bondi_app/services/raster_map.dart';
 import 'package:bondi_app/widgets/offline_map_layer.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  test('Bundled map contains real Cordoba streets and valid geometry', () async {
-    final map = OfflineBasemap.decode(
-      await File('assets/maps/cordoba.json.gz').readAsBytes(),
-    );
-    expect(map.features.length, greaterThan(40000));
-    expect(map.features.any((f) => f.name.contains('Chacabuco')), isTrue);
-    expect(map.features.any((f) => f.kind == 'park'), isTrue);
-    expect(map.features.any((f) => f.kind == 'water'), isTrue);
-    expect(map.features.every((f) => f.points.length >= 2), isTrue);
-    expect(DateTime.tryParse(map.dataDate), isNotNull);
-    for (final bounds in [
-      LatLngBounds(const LatLng(-31.43, -64.19), const LatLng(-31.41, -64.17)),
-      LatLngBounds(const LatLng(-31.55, -64.35), const LatLng(-31.25, -64.05)),
-      LatLngBounds(const LatLng(0, 0), const LatLng(1, 1)),
-    ]) {
-      final expected = map.features
-          .where((f) => f.bounds.isOverlapping(bounds))
-          .toList();
-      expect(map.visibleFeatures(bounds).toList(), expected);
-    }
-    final viewport = LatLngBounds(
-      const LatLng(-31.43, -64.19),
-      const LatLng(-31.41, -64.17),
-    );
-    final full = Stopwatch()..start();
-    for (var i = 0; i < 100; i++) {
-      map.features.where((f) => f.bounds.isOverlapping(viewport)).toList();
-    }
-    full.stop();
-    final indexed = Stopwatch()..start();
-    for (var i = 0; i < 100; i++) {
-      map.visibleFeatures(viewport).toList();
-    }
-    indexed.stop();
-    debugPrint(
-      'Viewport query 100x: full=${full.elapsedMicroseconds}us indexed=${indexed.elapsedMicroseconds}us, visible=${map.visibleFeatures(viewport).length}/${map.features.length}',
-    );
-  });
-  testWidgets('Local map renders streets without any network tile layer', (
-    tester,
-  ) async {
-    final loaded = await tester.runAsync(() => OfflineBasemap.load());
-    expect(loaded!.features, isNotEmpty);
-    final controller = MapController();
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: FlutterMap(
-            mapController: controller,
-            options: const MapOptions(
-              initialCenter: LatLng(-31.42, -64.18),
-              initialZoom: 15,
+  test(
+    'Raster package has a complete contiguous index and valid PNG tiles',
+    () async {
+      final manifest = jsonDecode(
+        await File('assets/maps/cordoba.tiles.json').readAsString(),
+      );
+      final bytes = await File('assets/maps/cordoba.tiles').readAsBytes();
+      final index = manifest['tiles'] as Map<String, dynamic>;
+      expect(index.length, 4962);
+      expect(manifest['minZoom'], 10);
+      expect(manifest['maxZoom'], 16);
+      var offset = 0;
+      for (final entry in index.values) {
+        expect(entry[0], offset);
+        final length = entry[1] as int;
+        expect(bytes.sublist(offset, offset + 8), [
+          137,
+          80,
+          78,
+          71,
+          13,
+          10,
+          26,
+          10,
+        ]);
+        offset += length;
+      }
+      expect(offset, bytes.length);
+    },
+  );
+  testWidgets(
+    'Local raster map displays packaged PNGs without network or street geometry',
+    (tester) async {
+      final loaded = await tester.runAsync(() => RasterMap.load());
+      expect(loaded, isNotNull);
+      final controller = MapController();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: FlutterMap(
+              mapController: controller,
+              options: const MapOptions(
+                initialCenter: LatLng(-31.42, -64.18),
+                initialZoom: 15,
+              ),
+              children: const [OfflineMapLayer()],
             ),
-            children: const [OfflineMapLayer()],
           ),
         ),
-      ),
-    );
-    await tester.runAsync(() async {
-      await Future<void>.delayed(Duration.zero);
-    });
-    await tester.pumpAndSettle();
-    expect(find.byType(TileLayer), findsNothing);
-    expect(find.textContaining('No se pudo'), findsNothing);
-
-    final roadLayer = find.byWidgetPredicate(
-      (widget) => widget is PolylineLayer,
-    );
-    expect(roadLayer, findsOneWidget);
-    final roads = tester.widget<PolylineLayer>(roadLayer);
-    expect(roads.polylines, isNotEmpty);
-    expect(roads.polylines.length, lessThan(10000));
-    final previousRoads = roads.polylines;
-    controller.move(const LatLng(-31.4201, -64.1801), 15);
-    await tester.pump();
-    expect(
-      identical(
-        tester.widget<PolylineLayer>(roadLayer).polylines,
-        previousRoads,
-      ),
-      isTrue,
-    );
-    await tester.pumpWidget(const SizedBox());
-    controller.dispose();
-  });
+      );
+      await tester.runAsync(() async {
+        await Future<void>.delayed(Duration.zero);
+      });
+      await tester.pumpAndSettle();
+      final layer = tester.widget<TileLayer>(find.byType(TileLayer));
+      expect(layer.tileProvider, isA<RasterMap>());
+      expect(layer.urlTemplate, isNull);
+      expect(find.byType(PolylineLayer), findsNothing);
+      expect(find.byType(PolygonLayer), findsNothing);
+      expect(tester.takeException(), isNull);
+      controller.move(const LatLng(-31.43, -64.19), 16);
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+      controller.dispose();
+    },
+  );
 }

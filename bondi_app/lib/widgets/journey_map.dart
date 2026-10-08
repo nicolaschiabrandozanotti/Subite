@@ -131,12 +131,19 @@ class _JourneyMapState extends State<JourneyMap> {
       onTap: (_, point) => widget.onPointPicked(point),
     ),
     children: [
-      if (widget.journey.offline) const OfflineMapLayer(),
-      if (!widget.journey.offline)
-        TileLayer(
-          urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-          userAgentPackageName: 'com.bondicba.app',
+      const OfflineMapLayer(),
+      const IgnorePointer(
+        child: Align(
+          alignment: Alignment.bottomRight,
+          child: Padding(
+            padding: EdgeInsets.all(8),
+            child: Text(
+              '© OpenStreetMap contributors',
+              style: TextStyle(fontSize: 10, backgroundColor: Colors.white),
+            ),
+          ),
         ),
+      ),
       PolylineLayer(polylines: _mapPolylines()),
       MarkerLayer(
         markers: [
