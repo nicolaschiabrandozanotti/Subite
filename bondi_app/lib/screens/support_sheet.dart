@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 
 import 'package:flutter/services.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class SupportSheet extends StatelessWidget {
   const SupportSheet({super.key});
@@ -11,7 +10,6 @@ class SupportSheet extends StatelessWidget {
   static const alias = 'nicochiabrando';
   static const cvu = '0000003100012189129203';
   static const owner = 'Nicolás Chiabrando Zanotti';
-  static final paymentUrl = Uri.parse('https://mpago.la/1LqRS6N');
 
   Future<void> _copy(BuildContext context, String value) async {
     await Clipboard.setData(ClipboardData(text: value));
@@ -19,32 +17,6 @@ class SupportSheet extends StatelessWidget {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Copiado. Ya podés pegarlo en tu billetera.'),
-      ),
-    );
-  }
-
-  Future<void> _open(BuildContext context) async {
-    try {
-      if (await launchUrl(paymentUrl, mode: LaunchMode.externalApplication)) {
-        return;
-      }
-    } catch (_) {
-      // Keep the transfer details available if the payment app cannot open.
-    }
-    if (!context.mounted) return;
-    showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('No pudimos abrir Mercado Pago'),
-        content: const Text(
-          'Podés copiar el alias y hacer el aporte desde tu banco o billetera.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Aceptar'),
-          ),
-        ],
       ),
     );
   }
@@ -99,15 +71,6 @@ class SupportSheet extends StatelessWidget {
                   label: const Text('Copiar CVU'),
                 ),
               ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: () => _open(context),
-              icon: const Icon(Icons.open_in_new),
-              label: const Text('Abrir Mercado Pago'),
             ),
           ),
           const SizedBox(height: 12),

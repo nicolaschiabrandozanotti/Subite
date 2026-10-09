@@ -113,9 +113,8 @@ Subite es un proyecto independiente. Si te ayuda a moverte por Córdoba y queré
 
 <div align="center">
 
-  <a href="https://mpago.la/1LqRS6N"><img alt="Apoyar Subite con Mercado Pago" src="https://img.shields.io/badge/Apoyar_con_Mercado_Pago-009EE3?style=for-the-badge&logo=mercadopago&logoColor=white" /></a>
 
-  <p><sub>O transferí al alias <strong><code>nicochiabrando</code></strong>.</sub></p>
+  <p><sub>Transferí al alias <strong><code>nicochiabrando</code></strong>.</sub></p>
 
 </div>
 
