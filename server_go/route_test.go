@@ -12,6 +12,7 @@ import (
 
 func TestFullRouteUsesStopCatalogAndStringCoordinates(t *testing.T) {
 	s := NewBondiServer()
+	seedRouteCatalog(s)
 	s.cookie = "test"
 	s.cookieExpiry = time.Now().Add(time.Hour)
 	s.client.Transport = arrivalsTransport(func(r *http.Request) (*http.Response, error) {
