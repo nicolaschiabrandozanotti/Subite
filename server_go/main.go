@@ -3,12 +3,14 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"hash/fnv"
 	"io"
 	"log"
 	"math"
 	"net/http"
+	"net/netip"
 	"net/url"
 	"strings"
 	"sync"
@@ -22,15 +24,20 @@ const (
 
 type BondiServer struct {
 	mu              sync.RWMutex
+	trustedProxies  []netip.Prefix
+	revision        string
 	client          *http.Client
 	cookie          string
 	cookieExpiry    time.Time
 	lineasCache     []byte
 	lineasTime      time.Time
 	trazaCache      map[string]arrivalCacheEntry
-	lineasLoad      sync.Mutex
-	trazaLoad       [16]sync.Mutex
-	sessionLoad     sync.Mutex
+	cochesCache     map[string]arrivalCacheEntry
+	cochesLoad      [16]loadMutex
+	routes          map[string]bool
+	lineasLoad      loadMutex
+	trazaLoad       [16]loadMutex
+	sessionLoad     loadMutex
 	upstreamSlots   chan struct{}
 	arrivalsMu      sync.Mutex
 	arrivalsCache   map[string]arrivalCacheEntry
@@ -44,6 +51,7 @@ func NewBondiServer() *BondiServer {
 			Timeout: 10 * time.Second,
 		},
 		trazaCache:      make(map[string]arrivalCacheEntry),
+		cochesCache:     make(map[string]arrivalCacheEntry),
 		upstreamSlots:   make(chan struct{}, 16),
 		arrivalsCache:   make(map[string]arrivalCacheEntry),
 		arrivalsFlights: make(map[string]*arrivalFlight),
@@ -53,8 +61,10 @@ func NewBondiServer() *BondiServer {
 
 // Ensure active session with micronauta backend
 func (s *BondiServer) ensureSession(ctx context.Context) (string, error) {
-	s.sessionLoad.Lock()
-	defer s.sessionLoad.Unlock()
+	if err := s.sessionLoad.lock(ctx); err != nil {
+		return "", err
+	}
+	defer s.sessionLoad.unlock()
 
 	if err := ctx.Err(); err != nil {
 		return "", err
@@ -188,25 +198,24 @@ func enableCORS(next http.HandlerFunc) http.HandlerFunc {
 }
 
 // Handler: /api/lineas
-func (s *BondiServer) handleLineas(w http.ResponseWriter, r *http.Request) {
-	s.lineasLoad.Lock()
-	defer s.lineasLoad.Unlock()
+func (s *BondiServer) lines(ctx context.Context) ([]byte, error) {
+	if err := s.lineasLoad.lock(ctx); err != nil {
+		return nil, err
+	}
+	defer s.lineasLoad.unlock()
 	s.mu.RLock()
 	if len(s.lineasCache) > 0 && time.Since(s.lineasTime) < 30*time.Minute {
 		cached := s.lineasCache
 		s.mu.RUnlock()
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(cached)
-		return
+		return cached, nil
 	}
 	s.mu.RUnlock()
 
 	params := url.Values{}
 	params.Set("conf", "cbaciudad")
-	raw, err := s.makeRequest(r.Context(), "cmd=lineasyrutas", params, false)
+	raw, err := s.makeRequest(ctx, "cmd=lineasyrutas", params, false)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return nil, err
 	}
 
 	// Parse and reformat clean lines
@@ -282,8 +291,7 @@ func (s *BondiServer) handleLineas(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if len(cleanLines) == 0 {
-			http.Error(w, "Lines unavailable", http.StatusBadGateway)
-			return
+			return nil, errors.New("lines unavailable")
 		}
 		result := map[string]interface{}{
 			"lineas":    cleanLines,
@@ -296,14 +304,55 @@ func (s *BondiServer) handleLineas(w http.ResponseWriter, r *http.Request) {
 		s.mu.Lock()
 		s.lineasCache = formatted
 		s.lineasTime = time.Now()
+		s.routes = make(map[string]bool)
+		for _, line := range cleanLines {
+			for _, route := range line.Rutas {
+				s.routes[routeKey(line.ID, route.ID, fmt.Sprint(line.ClienteID))] = true
+			}
+		}
 		s.mu.Unlock()
 
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(formatted)
-		return
+		return formatted, nil
 	}
 
-	http.Error(w, "Lines unavailable", http.StatusBadGateway)
+	return nil, errors.New("lines unavailable")
+}
+
+func (s *BondiServer) handleLineas(w http.ResponseWriter, r *http.Request) {
+	body, err := s.lines(r.Context())
+	if err != nil {
+		upstreamError(w, err, "Lines unavailable")
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(body)
+}
+func routeKey(line, route, client string) string {
+	return url.Values{"linea": {line}, "ruta": {route}, "cliente": {client}}.Encode()
+}
+func (s *BondiServer) routeAllowed(ctx context.Context, line, route, client string) (bool, error) {
+	if _, err := s.lines(ctx); err != nil {
+		return false, err
+	}
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.routes[routeKey(line, route, client)], nil
+}
+func upstreamError(w http.ResponseWriter, err error, message string) {
+	if errors.Is(err, context.DeadlineExceeded) {
+		http.Error(w, "Request timed out", http.StatusGatewayTimeout)
+		return
+	}
+	if errors.Is(err, context.Canceled) {
+		http.Error(w, "Request cancelled", http.StatusRequestTimeout)
+		return
+	}
+	if errors.Is(err, errArrivalsBusy) {
+		w.Header().Set("Retry-After", "2")
+		http.Error(w, "Try again shortly", 503)
+		return
+	}
+	http.Error(w, message, http.StatusBadGateway)
 }
 
 // Handler: /api/coches
@@ -318,19 +367,37 @@ func (s *BondiServer) handleCoches(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	params := url.Values{}
-	params.Set("ruta", ruta)
-	params.Set("coche", "0")
-	params.Set("cliente", cliente)
-	params.Set("parada_seleccionada", "0")
-	params.Set("conf", "cbaciudad")
-
-	raw, err := s.makeRequest(r.Context(), "cmd=consultacocheporruta", params, false)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	cacheKey := url.Values{"ruta": {ruta}, "cliente": {cliente}}.Encode()
+	hash := fnv.New32a()
+	hash.Write([]byte(cacheKey))
+	load := &s.cochesLoad[hash.Sum32()%uint32(len(s.cochesLoad))]
+	if err := load.lock(r.Context()); err != nil {
+		upstreamError(w, err, "Transport unavailable")
 		return
 	}
+	defer load.unlock()
+	s.mu.RLock()
+	cached, ok := s.cochesCache[cacheKey]
+	s.mu.RUnlock()
+	var raw []byte
+	var err error
+	if ok && time.Now().Before(cached.expires) {
+		raw = cached.data
+	} else {
+		params := url.Values{}
+		params.Set("ruta", ruta)
+		params.Set("coche", "0")
+		params.Set("cliente", cliente)
+		params.Set("parada_seleccionada", "0")
+		params.Set("conf", "cbaciudad")
 
+		raw, err = s.makeRequest(r.Context(), "cmd=consultacocheporruta", params, false)
+		if err != nil {
+			upstreamError(w, err, "Transport unavailable")
+			return
+		}
+
+	}
 	var parsed struct {
 		Coches []struct {
 			Coche     int     `json:"coche"`
@@ -347,6 +414,11 @@ func (s *BondiServer) handleCoches(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := json.Unmarshal(raw, &parsed); err == nil && parsed.Coches != nil {
+		if !ok || !time.Now().Before(cached.expires) {
+			s.mu.Lock()
+			storeResponse(s.cochesCache, cacheKey, raw, 15*time.Second, 8*1024*1024)
+			s.mu.Unlock()
+		}
 		type CleanCoche struct {
 			Coche     int     `json:"coche"`
 			Linea     string  `json:"linea"`
@@ -405,12 +477,24 @@ func (s *BondiServer) handleTraza(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid route", http.StatusBadRequest)
 		return
 	}
-	cacheKey := url.Values{"linea": {linea}, "ruta": {ruta}, "cliente": {cliente}}.Encode()
+	allowed, err := s.routeAllowed(r.Context(), linea, ruta, cliente)
+	if err != nil {
+		upstreamError(w, err, "Route unavailable")
+		return
+	}
+	if !allowed {
+		http.Error(w, "Unknown route", 400)
+		return
+	}
+	cacheKey := routeKey(linea, ruta, cliente)
 	hash := fnv.New32a()
 	hash.Write([]byte(cacheKey))
 	load := &s.trazaLoad[hash.Sum32()%uint32(len(s.trazaLoad))]
-	load.Lock()
-	defer load.Unlock()
+	if err := load.lock(r.Context()); err != nil {
+		upstreamError(w, err, "Route unavailable")
+		return
+	}
+	defer load.unlock()
 	s.mu.RLock()
 	if cached, ok := s.trazaCache[cacheKey]; ok && time.Now().Before(cached.expires) {
 		s.mu.RUnlock()
@@ -424,7 +508,7 @@ func (s *BondiServer) handleTraza(w http.ResponseWriter, r *http.Request) {
 		"ruta": {ruta}, "cliente_id": {cliente}, "conf": {"cbaciudad"},
 	}, false)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		upstreamError(w, err, "Transport unavailable")
 		return
 	}
 
@@ -507,8 +591,8 @@ func newHandler(server *BondiServer) http.Handler {
 	mux.HandleFunc("/api/arrivals", enableCORS(server.handleArrivals))
 	mux.HandleFunc("/api/health", enableCORS(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(`{"status":"ok","engine":"golang","version":"1.0.4"}`))
+		json.NewEncoder(w).Encode(map[string]string{"status": "ok", "engine": "golang", "version": "1.0.5", "revision": server.revision})
 	}))
 
-	return compressCatalogs(mux)
+	return protectAPI(compressCatalogs(mux), server.trustedProxies)
 }

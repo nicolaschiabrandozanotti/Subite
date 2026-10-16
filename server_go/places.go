@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"hash/fnv"
 	"io"
 	"net/http"
 	"net/url"
@@ -27,10 +28,7 @@ func normalizePlaceQuery(q string) string {
 	return q
 }
 
-type placeCacheEntry struct {
-	body    []byte
-	expires time.Time
-}
+type placeCacheEntry = arrivalCacheEntry
 
 var placeCache = struct {
 	sync.Mutex
@@ -40,6 +38,7 @@ var placeClient = &http.Client{Timeout: 5 * time.Second}
 var addressHeight = regexp.MustCompile(`^(.*\D)\s+(\d+)\s*$`)
 var streetPrefix = regexp.MustCompile(`^(avenida|av\.?|avda\.?|calle)\s+`)
 var placeSlots = make(chan struct{}, 8)
+var placeLoads [16]loadMutex
 
 type searchPlace struct {
 	Street   string  `json:"-"`
@@ -165,12 +164,20 @@ func handlePlaces(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Ingresá entre 3 y 160 caracteres", 400)
 		return
 	}
+	hash := fnv.New32a()
+	hash.Write([]byte(query))
+	load := &placeLoads[hash.Sum32()%uint32(len(placeLoads))]
+	if err := load.lock(r.Context()); err != nil {
+		upstreamError(w, err, "Buscador no disponible")
+		return
+	}
+	defer load.unlock()
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	placeCache.Lock()
 	cached, ok := placeCache.entries[query]
 	placeCache.Unlock()
 	if ok && time.Now().Before(cached.expires) {
-		w.Write(cached.body)
+		w.Write(cached.data)
 		return
 	}
 	select {
@@ -241,17 +248,7 @@ func handlePlaces(w http.ResponseWriter, r *http.Request) {
 	}
 	body, _ := json.Marshal(map[string]interface{}{"places": places, "source": "Georef + Photon / OpenStreetMap"})
 	placeCache.Lock()
-	if len(placeCache.entries) >= 256 {
-		var oldest string
-		var expiry time.Time
-		for key, entry := range placeCache.entries {
-			if expiry.IsZero() || entry.expires.Before(expiry) {
-				oldest, expiry = key, entry.expires
-			}
-		}
-		delete(placeCache.entries, oldest)
-	}
-	placeCache.entries[query] = placeCacheEntry{body, time.Now().Add(15 * time.Minute)}
+	storeResponse(placeCache.entries, query, body, 15*time.Minute, 4*1024*1024)
 	placeCache.Unlock()
 	w.Write(body)
 }

@@ -5,6 +5,7 @@ El servidor puede ejecutarse como binario Go o contenedor en cualquier proveedor
 ## Configuración
 
 - `PORT`: puerto de escucha; por defecto 3001. El contenedor usa 8080. Escucha en todas las interfaces.
+- `TRUSTED_PROXY_CIDRS`: rangos CIDR separados por comas de los proxies que realmente pueden conectarse al backend. Sin configurar, se usa la IP de la conexión y se ignora `X-Forwarded-For`. Con proxies configurados, se recorre esa cabecera desde la derecha hasta la primera IP no confiable. No usar `0.0.0.0/0`, `::/0` ni confiar indiscriminadamente en redes privadas. Configurar y verificar toda la cadena del proveedor antes de publicar detrás de Render u otro proxy: de lo contrario los usuarios pueden compartir la cuota del proxy. No copiar rangos de ejemplo a producción. Restringir el acceso directo al origen cuando corresponda.
 - Comprobación de salud: `GET /api/health`. No consulta al servicio de transporte.
 - Compilación: desde `server_go`, `go build -trimpath -ldflags="-s -w" -o subite .`.
 - Inicio: `./subite` (en Windows, `subite.exe`).
@@ -35,3 +36,13 @@ Koyeb ya exige un plan pago para nuevas cuentas: https://www.koyeb.com/blog/koye
 Render documenta una instancia gratuita que se suspende tras 15 minutos sin tráfico: https://render.com/docs/free. Sirve para pruebas si se acepta la demora al despertar. Verificar sus condiciones al crear el servicio. Configurar directorio raíz `server_go`, compilación `go build -trimpath -ldflags="-s -w" -o subite .`, inicio `./subite` y health check `/api/health`. HTTPS lo gestiona el proveedor.
 
 El primer despliegue está disponible en `https://subite-backend.onrender.com`, pero estas mejoras locales requieren publicarse para llegar al servidor. La APK también requiere recompilarse para incorporar los cambios del cliente.
+
+## Protección de la API
+
+Por instancia: hasta 600 peticiones por minuto por IP (las IPv6 comparten cuota por /64), 30 búsquedas por minuto por IP, 12 peticiones simultáneas por IP y 64 en total. Además, por IP hay hasta seis peticiones de recorridos, tres de llegadas, tres de colectivos y dos de búsquedas simultáneas. El planificador normal usa tres cargas de recorridos. Las cuotas se comparten en redes con NAT; ajustar con evidencia de uso real si limita a usuarios legítimos. Se responde 429 con `Retry-After` al superar cuotas; el health check queda disponible. El registro de cuotas admite hasta 4096 clientes y no guarda sus IP en disco. Los límites son locales a cada proceso: mantener una instancia inicialmente; no son una protección completa contra ataques distribuidos.
+
+Las peticiones admitidas tienen un contexto de 30 segundos; las esperas de catálogo, recorrido, búsqueda, colectivos y sesión respetan su cancelación. Colectivos comparte cargas y caché por ruta/empresa durante 15 segundos, con un máximo de 8 MiB. Búsquedas comparte cargas iguales y guarda hasta 4 MiB durante 15 minutos. Los recorridos se aceptan únicamente si la combinación línea/ruta/empresa existe en el catálogo vigente. Los errores al cliente no incluyen los errores internos del transporte.
+
+Antes de desplegar, verificar la cadena de proxies y probar que dos clientes tienen cuotas independientes y que una cabecera reenviada inventada no cambia la identidad efectiva. No habilitar logs de URL completa, query strings, cuerpos de búsqueda o coordenadas personales. El código Go no registra esos datos; los access logs y su retención deben revisarse en el proveedor. Los servicios externos tienen sus propias políticas. No se ha cambiado la configuración de ninguna cuenta de hosting mediante estos cambios locales.
+
+`/api/health` informa también la revisión recibida en `RENDER_GIT_COMMIT`. Las respuestas admitidas incluyen `X-RateLimit-Remaining` y `X-RateLimit-Reset` para comprobar cuotas sin exponer IPs ni enviar consultas al proveedor. En Render Free, el origen no recibe conexiones de la red privada; la confianza en proxies internos debe limitarse al entorno de ese servicio y completarse con los [rangos oficiales de Cloudflare](https://www.cloudflare.com/ips/). Verificar la cadena con peticiones de bajo costo desde dos redes antes de dar el despliegue por validado.

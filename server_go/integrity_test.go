@@ -22,6 +22,12 @@ func transportServer(body string) *BondiServer {
 	return s
 }
 
+func seedRouteCatalog(s *BondiServer) {
+	s.lineasCache = []byte(`{"lineas":[{"id":"70","nombre":"70","clienteId":422,"rutas":[{"id":"211"}]}]}`)
+	s.lineasTime = time.Now()
+	s.routes = map[string]bool{routeKey("70", "211", "422"): true}
+}
+
 func TestInvalidCatalogsAreNotCached(t *testing.T) {
 	s := transportServer(`{"err":1}`)
 	for _, path := range []string{"/api/lineas", "/api/traza?linea=70&ruta=211&cliente=422", "/api/coches?ruta=211"} {
@@ -60,6 +66,7 @@ func TestArrivalsOverloadIsBounded(t *testing.T) {
 
 func TestRouteConcurrentLoadsAndExpiry(t *testing.T) {
 	s := transportServer(`{"traza":[[-64.2,-31.4]],"paradas":[{"codigo":"123","lat":-31.4,"lon":-64.2}]}`)
+	seedRouteCatalog(s)
 	original := s.client.Transport
 	var calls atomic.Int32
 	s.client.Transport = arrivalsTransport(func(r *http.Request) (*http.Response, error) {
