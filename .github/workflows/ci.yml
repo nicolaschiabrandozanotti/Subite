@@ -30,6 +30,10 @@ jobs:
           cache-dependency-path: server_go/go.mod
       - name: Run Go tests
         run: go test ./...
+      - name: Check Go diagnostics
+        run: go vet ./...
+      - name: Check Go races
+        run: go test -race ./...
 
   flutter-checks:
     name: Flutter checks

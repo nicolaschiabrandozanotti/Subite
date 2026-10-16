@@ -29,7 +29,14 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	server := &http.Server{Addr: addr, Handler: newHandler(NewBondiServer()), ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 35 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 16 * 1024}
+	trusted, err := trustedProxyRanges(os.Getenv("TRUSTED_PROXY_CIDRS"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	backend := NewBondiServer()
+	backend.trustedProxies = trusted
+	backend.revision = os.Getenv("RENDER_GIT_COMMIT")
+	server := &http.Server{Addr: addr, Handler: newHandler(backend), ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 35 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 16 * 1024}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	done := make(chan struct{})
